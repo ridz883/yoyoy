@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Downloader - Multi API Backup System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .platform-card {
+            transition: all 0.3s ease;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .platform-card.active {
+            border: 3px solid #667eea;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result-card {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .quality-badge {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .format-badge {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+        }
+        
+        .api-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        
+        .api-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .api-backup {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .api-active {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast flex items-center space-x-3">
+        <i id="toastIcon" class="fas fa-check-circle text-green-500 text-xl"></i>
+        <span id="toastMessage" class="font-medium">Notifikasi</span>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-effect sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">AllDownloader</h1>
+                        <p class="text-xs text-gray-500">Multi-API Backup System</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div id="currentApiBadge" class="api-status api-primary">
+                        <i class="fas fa-server mr-1"></i>
+                        <span id="apiName">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-12 text-white">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Unduh Konten dari Semua Platform</h2>
+            <p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
+                Sistem backup otomatis - Jika API 1 down, API 2 siap menggantikan
+            </p>
+        </div>
+
+        <!-- Platform Selector -->
+        <div class="glass-effect rounded-2xl p-6 mb-8 shadow-2xl">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Pilih Platform</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="platformGrid">
+                
+                <!-- TikTok -->
+                <div class="platform-card active cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('tiktok', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-black rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">TikTok</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                        <span class="api-status api-backup text-xs">API 2</span>
+                    </div>
+                </div>
+
+                <!-- YouTube -->
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('youtube', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-red-600 rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-youtube"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">YouTube</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">MP3</span>
+                        <span class="api-status api-backup text-xs">MP4</span>
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('instagram', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">Instagram</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                        <span class="api-status api-backup text-xs">API 2</span>
+                    </div>
+                </div>
+
+                <!-- Pinterest -->
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('pinterest', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-red-700 rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-pinterest"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">Pinterest</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                    </div>
+                </div>
+
+                <!-- Spotify -->
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('spotify', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-spotify"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">Spotify</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                        <span class="api-status api-backup text-xs">API 2</span>
+                    </div>
+                </div>
+
+                <!-- MediaFire -->
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-4 text-center shadow-md" onclick="selectPlatform('mediafire', this)">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700 text-sm">MediaFire</span>
+                    <div class="mt-2 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Additional Platforms Row -->
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-3 text-center shadow-md" onclick="selectPlatform('facebook', this)">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-600">Facebook</span>
+                    <div class="mt-1 flex justify-center gap-1">
+                        <span class="api-status api-primary text-xs">API 1</span>
+                        <span class="api-status api-backup text-xs">API 2</span>
+                    </div>
+                </div>
+                <div class="platform-card cursor-pointer bg-white rounded-xl p-3 text-center shadow-md" onclick="selectPlatform('twitter', this)">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-black rounded-full flex items-center justify-center text-white">
+                        <i class="fab fa-x-twitter"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-600">Twitter/X</span>
+                    <div class="mt-1">
+                        <span class="text-xs text-gray-400">Via TikTok API</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl mb-8">
+            <div class="max-w-3xl mx-auto">
+                <label class="block text-gray-700 font-semibold mb-2 text-lg">
+                    <i class="fas fa-link mr-2 text-purple-600"></i>
+                    Masukkan URL <span id="platformLabel" class="text-purple-600">TikTok</span>
+                </label>
+                <div class="relative">
+                    <input type="url" id="urlInput" 
+                           class="w-full px-6 py-4 rounded-xl border-2 border-gray-200 input-focus outline-none text-gray-700 text-lg pr-32"
+                           placeholder="https://www.tiktok.com/@username/video/123456..."
+                           onkeypress="handleEnter(event)">
+                    <button onclick="startDownload()" 
+                            class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 rounded-lg font-semibold hover:shadow-lg transition flex items-center space-x-2">
+                        <i class="fas fa-search"></i>
+                        <span>Analisis</span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between mt-2 ml-1">
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <span id="hintText">Sistem akan otomatis menggunakan API backup jika API utama gagal</span>
+                    </p>
+                    <button onclick="pasteFromClipboard()" class="text-sm text-purple-600 hover:text-purple-800 font-medium">
+                        <i class="fas fa-paste mr-1"></i> Paste
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="hidden glass-effect rounded-2xl p-12 text-center shadow-2xl mb-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2" id="loadingText">Menganalisis URL...</h3>
+            <p class="text-gray-500" id="loadingSubtext">Menghubungi API utama</p>
+            <div class="flex justify-center space-x-2 mt-4">
+                <span class="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></span>
+                <span class="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                <span class="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden glass-effect rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-6 border-b pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Hasil Analisis</h3>
+                        <p class="text-sm text-gray-500" id="usedApi">Menggunakan API utama</p>
+                    </div>
+                </div>
+                <button onclick="clearResults()" class="text-gray-400 hover:text-red-500 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div id="resultsContent" class="space-y-4">
+                <!-- Results will be injected here -->
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div id="errorSection" class="hidden glass-effect rounded-2xl p-6 shadow-2xl border-l-4 border-red-500 mb-8">
+            <div class="flex items-center space-x-3 mb-3">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                <h3 class="text-lg font-bold text-gray-800">Semua API Gagal</h3>
+            </div>
+            <p id="errorMessage" class="text-gray-600 mb-4">API 1 dan API 2 tidak merespons. Silakan coba lagi nanti.</p>
+            <button onclick="retryDownload()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                <i class="fas fa-redo mr-2"></i>Coba Lagi
+            </button>
+        </div>
+
+        <!-- API Status Info -->
+        <div class="glass-effect rounded-xl p-4 mb-8">
+            <h4 class="font-semibold text-gray-700 mb-3 text-sm">
+                <i class="fas fa-info-circle mr-2"></i>Status API Sistem
+            </h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div class="bg-blue-50 p-2 rounded border border-blue-200">
+                    <span class="font-bold text-blue-700">TikTok:</span>
+                    <span class="text-blue-600">tikwm.com (primary) → snapx.cab (backup)</span>
+                </div>
+                <div class="bg-pink-50 p-2 rounded border border-pink-200">
+                    <span class="font-bold text-pink-700">Instagram:</span>
+                    <span class="text-pink-600">baguss.xyz → yupra.my.id</span>
+                </div>
+                <div class="bg-red-50 p-2 rounded border border-red-200">
+                    <span class="font-bold text-red-700">YouTube:</span>
+                    <span class="text-red-600">deline.web.id (MP3 & MP4)</span>
+                </div>
+                <div class="bg-green-50 p-2 rounded border border-green-200">
+                    <span class="font-bold text-green-700">Spotify:</span>
+                    <span class="text-green-600">baguss.xyz → deline.web.id</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Info -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12">
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl mx-auto mb-4">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Multi-API Backup</h4>
+                <p class="text-gray-600 text-sm">Otomatis pindah ke API cadangan jika utama down</p>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-2xl mx-auto mb-4">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Cepat & Handal</h4>
+                <p class="text-gray-600 text-sm">Respons instan dengan fallback otomatis</p>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 text-2xl mx-auto mb-4">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">99.9% Uptime</h4>
+                <p class="text-gray-600 text-sm">Sistem redundancy untuk ketersediaan maksimal</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 bg-white bg-opacity-10 backdrop-blur-lg text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">&copy; 2024 AllDownloader. Multi-API Backup System</p>
+            <p class="text-sm opacity-75">Dibuat dengan ❤️ untuk pengguna Indonesia</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // MULTI-API CONFIGURATION WITH BACKUP SYSTEM
+        // ============================================
+        
+        const API_CONFIG = {
+            tiktok: {
+                primary: {
+                    url: 'https://tikwm.com/api/',
+                    method: 'GET',
+                    params: (videoUrl) => `?url=${encodeURIComponent(videoUrl)}`,
+                    parser: (data) => ({
+                        success: data.code === 0 || data.status === 'success',
+                        videoUrl: data.data?.play || data.data?.video || data.video,
+                        audioUrl: data.data?.music || data.music,
+                        thumbnail: data.data?.cover || data.data?.wmplay || data.cover,
+                        author: data.data?.author?.nickname || data.author,
+                        title: data.data?.title || 'TikTok Video'
+                    })
+                },
+                backup: {
+                    url: 'https://snapx.cab/api/tiktok',
+                    method: 'GET',
+                    params: (videoUrl) => `?url=${encodeURIComponent(videoUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.url || !!data.videoUrl || data.status === 'success',
+                        videoUrl: data.url || data.videoUrl || data.data?.url,
+                        audioUrl: data.audioUrl || data.music,
+                        thumbnail: data.thumbnail || data.cover,
+                        author: data.author || data.username,
+                        title: data.title || 'TikTok Video'
+                    })
+                }
+            },
+            
+            instagram: {
+                primary: {
+                    url: 'https://api.baguss.xyz/api/download/instagram',
+                    method: 'GET',
+                    params: (postUrl) => `?url=${encodeURIComponent(postUrl)}`,
+                    parser: (data) => ({
+                        success: data.status === true || data.success === true,
+                        items: (data.result || data.data || []).map(item => ({
+                            type: item.type || (item.url?.includes('.mp4') ? 'video' : 'image'),
+                            url: item.url || item.link,
+                            thumbnail: item.thumbnail || item.url
+                        })),
+                        title: data.title || 'Instagram Post'
+                    })
+                },
+                backup: {
+                    url: 'https://api.yupra.my.id/api/downloader/Instagram',
+                    method: 'GET',
+                    params: (postUrl) => `?url=${encodeURIComponent(postUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result || !!data.data || data.status === 'success',
+                        items: (data.result || data.data || []).map(item => ({
+                            type: item.type || 'image',
+                            url: item.url || item.link || item.src,
+                            thumbnail: item.thumbnail || item.url
+                        })),
+                        title: 'Instagram Post'
+                    })
+                }
+            },
+            
+            youtube: {
+                // YouTube punya 2 endpoint berbeda untuk MP3 dan MP4
+                mp3: {
+                    url: 'https://api.deline.web.id/downloader/ytmp3',
+                    method: 'GET',
+                    params: (videoUrl) => `?url=${encodeURIComponent(videoUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result?.download || !!data.url || data.status === 'success',
+                        title: data.result?.title || data.title || 'YouTube Video',
+                        thumbnail: data.result?.thumb || data.thumbnail,
+                        downloadUrl: data.result?.download?.url || data.result?.link || data.url,
+                        quality: 'MP3 Audio',
+                        format: 'mp3'
+                    })
+                },
+                mp4: {
+                    url: 'https://api.deline.web.id/downloader/ytmp4',
+                    method: 'GET',
+                    params: (videoUrl) => `?url=${encodeURIComponent(videoUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result?.download || !!data.url || data.status === 'success',
+                        title: data.result?.title || data.title || 'YouTube Video',
+                        thumbnail: data.result?.thumb || data.thumbnail,
+                        downloadUrl: data.result?.download?.url || data.result?.link || data.url,
+                        quality: data.result?.download?.quality || 'HD',
+                        format: 'mp4'
+                    })
+                }
+            },
+            
+            facebook: {
+                primary: {
+                    url: 'https://api.baguss.xyz/api/download/facebook',
+                    method: 'GET',
+                    params: (fbUrl) => `?url=${encodeURIComponent(fbUrl)}`,
+                    parser: (data) => ({
+                        success: data.status === true || data.success === true,
+                        title: data.result?.title || 'Facebook Video',
+                        thumbnail: data.result?.thumbnail,
+                        formats: [
+                            {
+                                quality: 'HD',
+                                url: data.result?.hd || data.result?.url,
+                                type: 'video/mp4'
+                            },
+                            {
+                                quality: 'SD',
+                                url: data.result?.sd || data.result?.url,
+                                type: 'video/mp4'
+                            }
+                        ].filter(f => f.url)
+                    })
+                },
+                backup: {
+                    url: 'https://api.deline.web.id/downloader/facebook',
+                    method: 'GET',
+                    params: (fbUrl) => `?url=${encodeURIComponent(fbUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result || data.status === 'success',
+                        title: data.result?.title || 'Facebook Video',
+                        thumbnail: data.result?.thumb,
+                        formats: [
+                            {
+                                quality: 'HD',
+                                url: data.result?.download?.url || data.result?.url,
+                                type: 'video/mp4'
+                            }
+                        ].filter(f => f.url)
+                    })
+                }
+            },
+            
+            spotify: {
+                primary: {
+                    url: 'https://api.baguss.xyz/api/download/spotify',
+                    method: 'GET',
+                    params: (trackUrl) => `?url=${encodeURIComponent(trackUrl)}`,
+                    parser: (data) => ({
+                        success: data.status === true || data.success === true,
+                        title: data.result?.title || data.title,
+                        artist: data.result?.artis || data.artist || data.result?.artist,
+                        thumbnail: data.result?.thumb || data.thumbnail || data.cover,
+                        downloadUrl: data.result?.download || data.result?.link || data.url
+                    })
+                },
+                backup: {
+                    url: 'https://api.deline.web.id/downloader/spotify',
+                    method: 'GET',
+                    params: (trackUrl) => `?url=${encodeURIComponent(trackUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result || data.status === 'success',
+                        title: data.result?.title || data.title,
+                        artist: data.result?.artis || data.artist,
+                        thumbnail: data.result?.thumb || data.thumbnail,
+                        downloadUrl: data.result?.download?.url || data.result?.link || data.url
+                    })
+                }
+            },
+            
+            mediafire: {
+                primary: {
+                    url: 'https://api.deline.web.id/downloader/mediafire',
+                    method: 'GET',
+                    params: (fileUrl) => `?url=${encodeURIComponent(fileUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.result || data.status === 'success',
+                        filename: data.result?.nama || data.result?.name || data.name || 'File',
+                        size: data.result?.size || data.size || 'Unknown',
+                        downloadUrl: data.result?.link || data.result?.download || data.url
+                    })
+                }
+            },
+            
+            pinterest: {
+                primary: {
+                    url: 'https://api.baguss.xyz/api/download/pinterest',
+                    method: 'GET',
+                    params: (pinUrl) => `?url=${encodeURIComponent(pinUrl)}`,
+                    parser: (data) => ({
+                        success: data.status === true || data.success === true,
+                        title: data.result?.title || 'Pinterest Content',
+                        downloadUrl: data.result?.download || data.result?.url || data.url,
+                        thumbnail: data.result?.image || data.thumbnail
+                    })
+                }
+            },
+            
+            twitter: {
+                // Menggunakan backup TikTok API untuk Twitter
+                primary: {
+                    url: 'https://snapx.cab/api/tiktok',
+                    method: 'GET',
+                    params: (tweetUrl) => `?url=${encodeURIComponent(tweetUrl)}`,
+                    parser: (data) => ({
+                        success: !!data.url || data.status === 'success',
+                        items: [{
+                            type: 'video',
+                            url: data.url || data.videoUrl,
+                            quality: 'HD'
+                        }]
+                    })
+                }
+            }
+        };
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        
+        let currentPlatform = 'tiktok';
+        let lastUrl = '';
+        let currentApiUsed = '';
+        let youtubeFormat = 'mp4'; // 'mp3' atau 'mp4' untuk YouTube
+
+        const platformHints = {
+            tiktok: 'Video TikTok tanpa watermark - Auto backup jika API 1 down',
+            youtube: 'Pilih format: MP3 (audio) atau MP4 (video)',
+            instagram: 'Foto, video, reels, dan carousel - Dual API backup',
+            pinterest: 'Gambar dan video dari Pinterest',
+            spotify: 'Konversi lagu Spotify ke MP3 - Dual API backup',
+            mediafire: 'Direct download file dari MediaFire',
+            facebook: 'Video Facebook HD/SD - Dual API backup',
+            twitter: 'Video dan GIF dari Twitter/X'
+        };
+
+        const placeholders = {
+            tiktok: 'https://www.tiktok.com/@username/video/123456...',
+            youtube: 'https://www.youtube.com/watch?v=...',
+            instagram: 'https://www.instagram.com/p/ABC123...',
+            pinterest: 'https://id.pinterest.com/pin/123456...',
+            spotify: 'https://open.spotify.com/track/...',
+            mediafire: 'https://www.mediafire.com/file/...',
+            facebook: 'https://www.facebook.com/watch?v=...',
+            twitter: 'https://twitter.com/username/status/...'
+        };
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        
+        function selectPlatform(platform, element) {
+            currentPlatform = platform;
+            
+            // Update active state
+            document.querySelectorAll('.platform-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Update labels
+            document.getElementById('platformLabel').textContent = 
+                platform.charAt(0).toUpperCase() + platform.slice(1);
+            document.getElementById('hintText').textContent = platformHints[platform];
+            document.getElementById('urlInput').placeholder = placeholders[platform] || 'Masukkan URL...';
+            
+            // YouTube format selector
+            if (platform === 'youtube') {
+                showYoutubeFormatSelector();
+            }
+            
+            clearResults();
+        }
+
+        function showYoutubeFormatSelector() {
+            // Tambahkan selector MP3/MP4 untuk YouTube
+            const inputSection = document.getElementById('urlInput').parentElement;
+            if (!document.getElementById('ytFormatSelector')) {
+                const selector = document.createElement('div');
+                selector.id = 'ytFormatSelector';
+                selector.className = 'flex gap-2 mt-2';
+                selector.innerHTML = `
+                    <button onclick="setYoutubeFormat('mp4')" id="btnMp4" class="flex-1 py-2 rounded-lg bg-red-600 text-white font-semibold text-sm">
+                        <i class="fas fa-video mr-1"></i> MP4 Video
+                    </button>
+                    <button onclick="setYoutubeFormat('mp3')" id="btnMp3" class="flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-300">
+                        <i class="fas fa-music mr-1"></i> MP3 Audio
+                    </button>
+                `;
+                inputSection.parentElement.appendChild(selector);
+            }
+            document.getElementById('ytFormatSelector').style.display = 'flex';
+        }
+
+        function setYoutubeFormat(format) {
+            youtubeFormat = format;
+            document.getElementById('btnMp4').className = format === 'mp4' 
+                ? 'flex-1 py-2 rounded-lg bg-red-600 text-white font-semibold text-sm'
+                : 'flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-300';
+            document.getElementById('btnMp3').className = format === 'mp3'
+                ? 'flex-1 py-2 rounded-lg bg-red-600 text-white font-semibold text-sm'
+                : 'flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-300';
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') startDownload();
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('urlInput').value = text;
+                showToast('URL berhasil dipaste!', 'success');
+            } catch (err) {
+                showToast('Gagal mengakses clipboard', 'error');
+            }
+        }
+
+        function updateApiStatus(status, apiName) {
+            const badge = document.getElementById('currentApiBadge');
+            const name = document.getElementById('apiName');
+            
+            name.textContent = apiName;
+            
+            badge.className = 'api-status ' + 
+                (status === 'primary' ? 'api-primary' : 
+                 status === 'backup' ? 'api-backup' : 'api-active');
+        }
+
+        // ============================================
+        // CORE API FUNCTIONS WITH BACKUP SYSTEM
+        // ============================================
+        
+        async function tryApi(apiConfig, url) {
+            const fullUrl = apiConfig.url + apiConfig.params(url);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+            
+            try {
+                const response = await fetch(fullUrl, {
+                    method: apiConfig.method,
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const parsed = apiConfig.parser(data);
+                
+                if (!parsed.success) throw new Error('Invalid data structure');
+                
+                return { success: true, data: parsed, source: apiConfig.url };
+                
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function fetchWithBackup(platform, url) {
+            const config = API_CONFIG[platform];
+            
+            if (!config) {
+                throw new Error('Platform tidak didukung');
+            }
+            
+            // YouTube special handling (MP3 vs MP4)
+            if (platform === 'youtube') {
+                const ytConfig = youtubeFormat === 'mp3' ? config.mp3 : config.mp4;
+                updateApiStatus('active', `YouTube ${youtubeFormat.toUpperCase()}`);
+                const result = await tryApi(ytConfig, url);
+                
+                if (result.success) {
+                    currentApiUsed = `deline.web.id (${youtubeFormat.toUpperCase()})`;
+                    return result.data;
+                } else {
+                    throw new Error(`Gagal mengambil YouTube ${youtubeFormat.toUpperCase()}`);
+                }
+            }
+            
+            // Try primary API
+            if (config.primary) {
+                updateApiStatus('active', 'API 1 (Primary)');
+                document.getElementById('loadingSubtext').textContent = 'Menghubungi API utama...';
+                
+                const primary = await tryApi(config.primary, url);
+                
+                if (primary.success) {
+                    currentApiUsed = primary.source.includes('tikwm') ? 'tikwm.com' :
+                                    primary.source.includes('baguss') ? 'baguss.xyz' :
+                                    primary.source.includes('deline') ? 'deline.web.id' :
+                                    'API 1';
+                    return primary.data;
+                }
+                
+                console.log('Primary API failed, trying backup...');
+            }
+            
+            // Try backup API
+            if (config.backup) {
+                updateApiStatus('active', 'API 2 (Backup)');
+                document.getElementById('loadingSubtext').textContent = 'API utama gagal, mencoba backup...';
+                
+                const backup = await tryApi(config.backup, url);
+                
+                if (backup.success) {
+                    currentApiUsed = backup.source.includes('snapx') ? 'snapx.cab' :
+                                    backup.source.includes('yupra') ? 'yupra.my.id' :
+                                    backup.source.includes('deline') ? 'deline.web.id (backup)' :
+                                    'API 2';
+                    showToast('Menggunakan API cadangan', 'info');
+                    return backup.data;
+                }
+            }
+            
+            // All failed
+            throw new Error('Semua API tidak merespons');
+        }
+
+        // ============================================
+        // MAIN DOWNLOAD FUNCTION
+        // ============================================
+        
+        async function startDownload() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showToast('Silakan masukkan URL terlebih dahulu!', 'error');
+                return;
+            }
+
+            lastUrl = url;
+
+            // Show loading
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('errorSection').classList.add('hidden');
+            document.getElementById('loadingText').textContent = 'Menganalisis URL...';
+            
+            try {
+                const data = await fetchWithBackup(currentPlatform, url);
+                
+                document.getElementById('loadingSection').classList.add('hidden');
+                showResults(data);
+                
+                // Update used API text
+                document.getElementById('usedApi').textContent = `Menggunakan: ${currentApiUsed}`;
+                updateApiStatus('primary', 'Ready');
+                
+                showToast('Berhasil mengambil data!', 'success');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                document.getElementById('loadingSection').classList.add('hidden');
+                document.getElementById('errorSection').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = error.message;
+                updateApiStatus('primary', 'Error');
+                showToast('Gagal: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        
+        function showResults(data) {
+            const resultsDiv = document.getElementById('resultsSection');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            resultsDiv.classList.remove('hidden');
+            
+            let html = '';
+            
+            switch(currentPlatform) {
+                case 'tiktok':
+                    html = renderTikTok(data);
+                    break;
+                case 'youtube':
+                    html = renderYouTube(data);
+                    break;
+                case 'instagram':
+                    html = renderInstagram(data);
+                    break;
+                case 'pinterest':
+                    html = renderPinterest(data);
+                    break;
+                case 'spotify':
+                    html = renderSpotify(data);
+                    break;
+                case 'mediafire':
+                    html = renderMediaFire(data);
+                    break;
+                case 'facebook':
+                    html = renderFacebook(data);
+                    break;
+                case 'twitter':
+                    html = renderTwitter(data);
+                    break;
+            }
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderTikTok(data) {
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-black">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/3">
+                            <div class="aspect-[9/16] bg-gray-200 rounded-lg overflow-hidden relative group">
+                                ${data.thumbnail ? 
+                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" alt="Preview" onerror="this.src=''">` :
+                                    `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-video text-4xl"></i></div>`
+                                }
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+                                    <i class="fas fa-play-circle text-white text-5xl opacity-0 group-hover:opacity-100 transition"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-2/3 space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-800">${data.title || 'TikTok Video'}</h4>
+                                <p class="text-gray-500 text-sm">${data.author || '@user'}</p>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="quality-badge text-white px-3 py-1 rounded-full text-xs font-semibold">HD</span>
+                                <span class="format-badge text-white px-3 py-1 rounded-full text-xs font-semibold">MP4</span>
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">No Watermark</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 pt-4">
+                                <a href="${data.videoUrl}" target="_blank" rel="noopener noreferrer"
+                                   class="download-btn text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 text-center hover:opacity-90">
+                                    <i class="fas fa-download"></i>
+                                    <span>Unduh Video HD</span>
+                                </a>
+                                ${data.audioUrl ? `
+                                <a href="${data.audioUrl}" target="_blank" rel="noopener noreferrer"
+                                   class="bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center justify-center space-x-2 text-center">
+                                    <i class="fas fa-music"></i>
+                                    <span>Audio Only</span>
+                                </a>
+                                ` : ''}
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <p class="text-xs text-blue-800">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Klik tombol untuk membuka video di tab baru, lalu klik kanan "Simpan video sebagai..."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderYouTube(data) {
+            const isAudio = youtubeFormat === 'mp3';
+            
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-red-600">
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="md:w-1/3">
+                            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden relative">
+                                ${data.thumbnail ? 
+                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" alt="Thumbnail">` :
+                                    `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-youtube text-5xl"></i></div>`
+                                }
+                                <div class="absolute bottom-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
+                                    ${isAudio ? 'MP3' : 'MP4'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-2/3 space-y-4">
+                            <h4 class="font-bold text-lg text-gray-800 line-clamp-2">${data.title}</h4>
+                            
+                            <div class="flex items-center gap-3">
+                                <span class="${isAudio ? 'format-badge' : 'quality-badge'} text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                    ${isAudio ? 'MP3 Audio' : data.quality || 'HD Video'}
+                                </span>
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
+                                    ${isAudio ? '128-320kbps' : 'MP4 Format'}
+                                </span>
+                            </div>
+                            
+                            <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer"
+                               class="download-btn block w-full text-white py-4 rounded-lg font-semibold text-center text-lg hover:opacity-90">
+                                <i class="fas fa-download mr-2"></i>
+                                Unduh ${isAudio ? 'Audio MP3' : 'Video MP4'}
+                            </a>
+                            
+                            <p class="text-xs text-gray-500 text-center">
+                                File siap diunduh • Klik link di atas untuk memulai download
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInstagram(data) {
+            if (!data.items || data.items.length === 0) {
+                return renderGeneric(data, 'Instagram');
+            }
+            
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg">
+                    <h4 class="font-bold text-lg text-gray-800 mb-4">
+                        ${data.items.length} Media Ditemukan 
+                        <span class="text-sm font-normal text-gray-500 ml-2">(Scroll untuk melihat semua)</span>
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-2">
+                        ${data.items.map((item, index) => `
+                            <div class="relative group bg-gray-100 rounded-lg overflow-hidden">
+                                <div class="aspect-square flex items-center justify-center">
+                                    ${item.type === 'video' ? 
+                                        `<i class="fas fa-play-circle text-4xl text-gray-400"></i>` :
+                                        `<img src="${item.thumbnail}" class="w-full h-full object-cover" alt="Media ${index + 1}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-image text-4xl text-gray-400\\'></i>'">`
+                                    }
+                                </div>
+                                <a href="${item.url}" target="_blank" rel="noopener noreferrer"
+                                   class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <div class="bg-white text-gray-800 px-4 py-2 rounded-full font-bold text-sm">
+                                        <i class="fas fa-download mr-1"></i> Unduh ${item.type === 'video' ? 'Video' : 'Foto'}
+                                    </div>
+                                </a>
+                                <div class="absolute top-2 right-2">
+                                    <span class="bg-black text-white text-xs px-2 py-1 rounded">
+                                        #${index + 1}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPinterest(data) {
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-red-700">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/2">
+                            <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                                ${data.thumbnail ? 
+                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" alt="Pinterest">` :
+                                    `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-5xl"></i></div>`
+                                }
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 space-y-4">
+                            <h4 class="font-bold text-lg text-gray-800">${data.title}</h4>
+                            <div class="flex gap-2">
+                                <span class="quality-badge text-white px-3 py-1 rounded-full text-xs">Original Quality</span>
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">High Res</span>
+                            </div>
+                            <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer"
+                               class="download-btn block w-full text-white py-3 rounded-lg font-semibold text-center">
+                                <i class="fas fa-download mr-2"></i>Unduh Gambar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSpotify(data) {
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-green-500">
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="md:w-1/3">
+                            <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+                                ${data.thumbnail ? 
+                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" alt="Album Art">` :
+                                    `<div class="w-full h-full flex items-center justify-center bg-green-100 text-green-600"><i class="fas fa-music text-5xl"></i></div>`
+                                }
+                            </div>
+                        </div>
+                        <div class="md:w-2/3 text-center md:text-left space-y-3">
+                            <h4 class="font-bold text-2xl text-gray-800">${data.title}</h4>
+                            <p class="text-lg text-gray-600">${data.artist}</p>
+                            <div class="flex items-center justify-center md:justify-start gap-2 my-4">
+                                <span class="quality-badge text-white px-3 py-1 rounded-full text-xs">320kbps</span>
+                                <span class="format-badge text-white px-3 py-1 rounded-full text-xs">MP3</span>
+                            </div>
+                            <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer"
+                               class="download-btn inline-flex items-center space-x-2 px-8 py-4 rounded-full font-bold text-lg hover:opacity-90">
+                                <i class="fas fa-download"></i>
+                                <span>Unduh Lagu</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMediaFire(data) {
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-blue-500">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-3xl">
+                            <i class="fas fa-file-archive"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-lg text-gray-800 truncate">${data.filename}</h4>
+                            <p class="text-sm text-gray-500">Size: ${data.size}</p>
+                        </div>
+                    </div>
+                    <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer"
+                       class="download-btn block w-full text-white py-4 rounded-lg font-semibold text-center text-lg hover:opacity-90">
+                        <i class="fas fa-cloud-download-alt mr-2"></i>Download File
+                    </a>
+                    <p class="text-xs text-gray-500 text-center mt-3">
+                        Direct link from MediaFire • Auto redirect
+                    </p>
+                </div>
+            `;
+        }
+
+        function renderFacebook(data) {
+            const formats = data.formats || [];
+            
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg border-l-4 border-blue-600">
+                    <div class="flex flex-col md:flex-row gap-6 mb-6">
+                        <div class="md:w-1/3">
+                            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                                ${data.thumbnail ? 
+                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" alt="Thumbnail">` :
+                                    `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fab fa-facebook text-5xl"></i></div>`
+                                }
+                            </div>
+                        </div>
+                        <div class="md:w-2/3">
+                            <h4 class="font-bold text-lg text-gray-800 mb-2 line-clamp-2">${data.title}</h4>
+                            <p class="text-sm text-gray-500">Pilih kualitas video:</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${formats.map(format => `
+                            <a href="${format.url}" target="_blank" rel="noopener noreferrer"
+                               class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-100 transition group">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                        ${format.quality}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">Kualitas ${format.quality}</p>
+                                        <p class="text-xs text-gray-500">Facebook Video</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-external-link-alt text-blue-600 text-xl group-hover:scale-110 transition"></i>
+                            </a>
+                        `).join('') || `
+                            <a href="${data.downloadUrl || data.formats?.[0]?.url}" target="_blank" rel="noopener noreferrer"
+                               class="col-span-full download-btn text-white py-3 rounded-lg font-semibold text-center">
+                                Unduh Video
+                            </a>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTwitter(data) {
+            const items = data.items || [];
+            
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg">
+                    <h4 class="font-bold text-lg text-gray-800 mb-4">Twitter/X Media</h4>
+                    <div class="space-y-3">
+                        ${items.map((item, index) => `
+                            <a href="${item.url}" target="_blank" rel="noopener noreferrer"
+                               class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-black hover:bg-gray-100 transition group">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">Video ${item.quality || 'HD'}</p>
+                                        <p class="text-xs text-gray-500">Twitter/X • #${index + 1}</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-download text-black text-xl group-hover:scale-110 transition"></i>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGeneric(data, platform) {
+            return `
+                <div class="result-card bg-white rounded-xl p-6 shadow-lg text-center">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mx-auto mb-4">
+                        <i class="fas fa-cloud-download-alt text-3xl"></i>
+                    </div>
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">${data.title || platform + ' Content'}</h4>
+                    <a href="${data.downloadUrl || data.url}" target="_blank" rel="noopener noreferrer"
+                       class="download-btn text-white px-8 py-3 rounded-lg font-semibold inline-block hover:opacity-90">
+                        <i class="fas fa-download mr-2"></i>Unduh Sekarang
+                    </a>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        
+        function clearResults() {
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('errorSection').classList.add('hidden');
+            document.getElementById('urlInput').value = '';
+            
+            // Hide YouTube selector
+            const ytSelector = document.getElementById('ytFormatSelector');
+            if (ytSelector) ytSelector.style.display = 'none';
+        }
+
+        function retryDownload() {
+            if (lastUrl) {
+                document.getElementById('urlInput').value = lastUrl;
+                startDownload();
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastMessage.textContent = message;
+            
+            const icons = {
+                success: 'fa-check-circle text-green-500',
+                error: 'fa-exclamation-circle text-red-500',
+                info: 'fa-info-circle text-blue-500'
+            };
+            
+            toastIcon.className = `fas ${icons[type] || icons.success} text-xl`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AllDownloader Multi-API System initialized');
+            console.log('Available APIs:', Object.keys(API_CONFIG));
+        });
+    </script>
+
+</body>
+</html>
