@@ -8,13 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "app.py"
-    },
-    {
-      "src": "/",
+      "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "ignore": ["index.html", "README.md"]
+  ]
 }
