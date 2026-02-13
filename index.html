@@ -3,811 +3,1400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Downloader - Original Fixed</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>TikBoost - TikTok Like Booster</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        * { font-family: 'Inter', sans-serif; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff0050;
+            --secondary: #00f2ea;
+            --dark: #0f0f0f;
+            --darker: #000000;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Poppins', sans-serif;
+            background: var(--darker);
             min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
         }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 80, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 242, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 0, 80, 0.05) 0%, transparent 30%);
+            animation: bgPulse 10s ease-in-out infinite;
         }
-        
-        .platform-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
-        
-        .platform-card:hover { transform: translateY(-5px); }
-        
-        .platform-card.active {
-            border: 3px solid #667eea;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
-        
-        .input-focus:focus {
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
-            outline: none;
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite;
         }
-        
-        .download-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .download-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        
-        .result-card { animation: slideUp 0.5s ease-out; }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top-color: #667eea;
+
+        .shape:nth-child(1) {
+            left: 10%;
+            top: 20%;
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            animation-delay: 0s;
         }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
+
+        .shape:nth-child(2) {
+            right: 15%;
+            top: 60%;
+            width: 120px;
+            height: 120px;
+            background: var(--secondary);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            left: 70%;
+            top: 10%;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            transform: rotate(45deg);
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(30px) rotate(240deg); }
+        }
+
+        /* Header */
+        header {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .creator-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.2), rgba(0, 242, 234, 0.2));
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .creator-badge i {
+            color: var(--secondary);
+        }
+
+        .creator-badge span {
+            background: linear-gradient(135deg, var(--secondary), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 0%, var(--secondary) 50%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--secondary), var(--primary), transparent);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 25px;
+            color: var(--primary);
+            font-size: 1.3rem;
+            z-index: 2;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 20px 25px 20px 60px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="url"]::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        input[type="url"]:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 30px rgba(255, 0, 80, 0.2);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff2d6f 100%);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(255, 0, 80, 0.4);
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid transparent;
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* Result Card */
+        .result-card {
+            margin-top: 30px;
+            padding: 30px;
+            background: rgba(0, 242, 234, 0.05);
+            border: 1px solid rgba(0, 242, 234, 0.2);
+            border-radius: 20px;
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-card.success {
+            background: rgba(0, 242, 234, 0.08);
+            border-color: rgba(0, 242, 234, 0.4);
+        }
+
+        .result-card.error {
+            background: rgba(255, 0, 80, 0.05);
+            border-color: rgba(255, 0, 80, 0.3);
+        }
+
+        .result-card.warning {
+            background: rgba(255, 193, 7, 0.05);
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .result-card.success .result-icon {
+            background: rgba(0, 242, 234, 0.2);
+            color: var(--secondary);
+        }
+
+        .result-card.error .result-icon {
+            background: rgba(255, 0, 80, 0.2);
+            color: var(--primary);
+        }
+
+        .result-card.warning .result-icon {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .result-message {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .success-details {
+            background: rgba(0, 242, 234, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .success-details h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .success-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .success-details li {
+            padding: 5px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-details li::before {
+            content: '✓';
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .error-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .error-details h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .error-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .error-details li {
+            padding: 5px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-details li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .cooldown-timer {
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.2), rgba(0, 242, 234, 0.2));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .cooldown-timer h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+        }
+
+        .timer-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(255, 0, 80, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Features */
+        .features {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .feature {
+            padding: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.2), rgba(0, 242, 234, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .feature h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .feature p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            margin-top: 50px;
+            border-top: 1px solid var(--border);
+        }
+
+        footer .creator-highlight {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.2), rgba(0, 242, 234, 0.2));
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+        }
+
+        footer .creator-highlight i {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        footer .creator-highlight span {
+            background: linear-gradient(135deg, var(--secondary), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .main-card {
+                padding: 30px 25px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .creator-badge {
+                display: none;
+            }
+
+            .mobile-creator {
+                display: flex !important;
+                justify-content: center;
+                margin-bottom: 30px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-creator {
+                display: none !important;
+            }
+        }
+
+        /* Toast Notification */
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            bottom: 30px;
+            right: 30px;
+            padding: 20px 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            color: #fff;
+            font-weight: 500;
             transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 400px;
         }
-        
-        .toast.show { transform: translateX(0); }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--secondary);
+        }
+
+        .toast.error {
+            border-color: var(--primary);
+        }
+
+        .toast.warning {
+            border-color: #ffc107;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--secondary);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--primary);
+        }
+
+        .toast.warning .toast-icon {
+            color: #ffc107;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* API Status Indicator */
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 242, 234, 0.1);
+            border: 1px solid rgba(0, 242, 234, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-status:hover {
+            background: rgba(0, 242, 234, 0.2);
+        }
+
+        .api-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .api-status.offline::before {
+            background: var(--primary);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Debug Info */
+        .debug-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border);
+        }
+
+        .debug-info summary {
+            cursor: pointer;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .debug-content {
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     </style>
 </head>
-<body class="antialiased">
-
-    <!-- Toast -->
-    <div id="toast" class="toast flex items-center space-x-3">
-        <i id="toastIcon" class="fas fa-check-circle text-green-500 text-xl"></i>
-        <span id="toastMessage" class="font-medium">Notifikasi</span>
+<body>
+    <div class="bg-animation"></div>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
 
-    <!-- Header -->
-    <header class="glass-effect sticky top-0 z-50 shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
-                        <i class="fas fa-cloud-download-alt"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-800">AllDownloader</h1>
-                        <p class="text-xs text-gray-500">Danzy API Edition</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span class="text-xs text-gray-600">API Online</span>
-                </div>
-            </div>
+    <header>
+        <div class="logo">
+            <i class="fab fa-tiktok"></i>
+            <span>TikBoost</span>
+        </div>
+        <div class="creator-badge">
+            <i class="fas fa-code"></i>
+            <span>Created by Ridzz</span>
         </div>
     </header>
 
-    <!-- Main -->
-    <main class="container mx-auto px-4 py-6 max-w-6xl">
-        
-        <!-- Hero -->
-        <div class="text-center mb-8 text-white">
-            <h2 class="text-3xl sm:text-4xl font-bold mb-3">Universal Downloader</h2>
-            <p class="text-base opacity-90 max-w-xl mx-auto">
-                Menggunakan API danzy.web.id yang cepat dan stabil
-            </p>
+    <div class="container">
+        <!-- Mobile Creator Badge -->
+        <div class="mobile-creator creator-badge">
+            <i class="fas fa-code"></i>
+            <span>Created by Ridzz</span>
         </div>
 
-        <!-- Platform Selector -->
-        <div class="glass-effect rounded-2xl p-4 sm:p-6 mb-6 shadow-2xl">
-            <h3 class="text-base font-semibold text-gray-700 mb-4 text-center">Pilih Platform</h3>
-            
-            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3" id="platformContainer">
-                <!-- TikTok -->
-                <div class="platform-card active bg-white rounded-xl p-3 text-center shadow-md" data-platform="tiktok">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-black rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-tiktok"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">TikTok</span>
-                    <div class="mt-1 flex justify-center gap-1">
-                        <span class="api-badge bg-blue-100 text-blue-700 text-xs px-2 rounded-full">1</span>
-                        <span class="api-badge bg-yellow-100 text-yellow-700 text-xs px-2 rounded-full">2</span>
-                    </div>
-                </div>
-
-                <!-- YouTube -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md" data-platform="youtube">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-red-600 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-youtube"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">YouTube</span>
-                    <div class="mt-1 flex justify-center gap-1">
-                        <span class="api-badge bg-green-100 text-green-700 text-xs px-2 rounded-full">MP4</span>
-                        <span class="api-badge bg-purple-100 text-purple-700 text-xs px-2 rounded-full">MP3</span>
-                    </div>
-                </div>
-
-                <!-- Instagram -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md" data-platform="instagram">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-instagram"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">IG</span>
-                    <div class="mt-1 flex justify-center">
-                        <span class="api-badge bg-blue-100 text-blue-700 text-xs px-2 rounded-full">API</span>
-                    </div>
-                </div>
-
-                <!-- Pinterest -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md opacity-50" data-platform="pinterest">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-red-700 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-pinterest-p"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">Pinterest</span>
-                    <div class="mt-1 flex justify-center">
-                        <span class="api-badge bg-red-100 text-red-700 text-xs px-2 rounded-full">OFF</span>
-                    </div>
-                </div>
-
-                <!-- Spotify -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md opacity-50" data-platform="spotify">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-green-500 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-spotify"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">Spotify</span>
-                    <div class="mt-1 flex justify-center">
-                        <span class="api-badge bg-red-100 text-red-700 text-xs px-2 rounded-full">OFF</span>
-                    </div>
-                </div>
-
-                <!-- MediaFire -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md" data-platform="mediafire">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-blue-500 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fas fa-fire"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">MF</span>
-                    <div class="mt-1 flex justify-center">
-                        <span class="api-badge bg-blue-100 text-blue-700 text-xs px-2 rounded-full">API</span>
-                    </div>
-                </div>
-
-                <!-- Facebook -->
-                <div class="platform-card bg-white rounded-xl p-3 text-center shadow-md" data-platform="facebook">
-                    <div class="w-10 h-10 mx-auto mb-1 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg">
-                        <i class="fab fa-facebook-f"></i>
-                    </div>
-                    <span class="font-semibold text-gray-700 text-xs block">FB</span>
-                    <div class="mt-1 flex justify-center">
-                        <span class="api-badge bg-blue-100 text-blue-700 text-xs px-2 rounded-full">API</span>
-                    </div>
-                </div>
+        <div class="hero">
+            <h1>Tingkatkan Like TikTok Anda</h1>
+            <p>Masukkan URL video TikTok Anda dan dapatkan like secara instan dengan sistem kami yang cepat dan aman.</p>
+            <div class="api-status" id="apiStatus" onclick="checkApiStatus()">
+                <i class="fas fa-server"></i> <span id="apiStatusText">Checking API...</span>
             </div>
         </div>
 
-        <!-- Input Section -->
-        <div class="glass-effect rounded-2xl p-6 shadow-2xl mb-6">
-            <div class="max-w-3xl mx-auto">
-                <label class="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
-                    <i class="fas fa-link mr-2 text-purple-600"></i>
-                    URL <span id="platformLabel" class="text-purple-600 bg-purple-100 px-2 py-1 rounded-full text-xs ml-2">TikTok</span>
-                </label>
-                
-                <div class="relative">
-                    <input type="url" id="urlInput" 
-                           class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 input-focus text-gray-700 text-sm sm:text-base pr-28"
-                           placeholder="https://www.tiktok.com/@username/video/123456...">
-                    <button id="searchBtn" class="absolute right-2 top-2 bottom-2 download-btn text-white px-4 rounded-lg font-semibold text-sm flex items-center space-x-1">
-                        <i class="fas fa-search"></i>
-                        <span class="hidden sm:inline">Analisis</span>
-                    </button>
-                </div>
-                
-                <div class="flex items-center justify-between mt-2">
-                    <p class="text-xs text-gray-500">
-                        <i class="fas fa-check-circle mr-1 text-green-500"></i>
-                        <span id="hintText">Video TikTok tanpa watermark</span>
-                    </p>
-                    <button id="pasteBtn" class="text-xs text-purple-600 hover:text-purple-800 font-medium">
-                        <i class="fas fa-paste mr-1"></i>Paste
-                    </button>
-                </div>
-
-                <!-- YouTube Format Selector -->
-                <div id="ytSelector" class="hidden mt-3 flex gap-2">
-                    <button id="btnMp4" class="flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold">
-                        <i class="fas fa-video mr-1"></i>MP4 Video
-                    </button>
-                    <button id="btnMp3" class="flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold">
-                        <i class="fas fa-music mr-1"></i>MP3 Audio
-                    </button>
+        <div class="main-card">
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <i class="fas fa-link input-icon"></i>
+                    <input type="url" id="tiktokUrl" placeholder="Tempel URL video TikTok di sini..." required>
                 </div>
             </div>
-        </div>
+            <button class="submit-btn" id="submitBtn" onclick="submitLike()">
+                <i class="fas fa-heart"></i> Tambah Like Sekarang
+            </button>
 
-        <!-- Loading -->
-        <div id="loadingSection" class="hidden glass-effect rounded-2xl p-8 text-center shadow-2xl mb-6">
-            <div class="loading-spinner mx-auto mb-3"></div>
-            <h3 class="text-lg font-semibold text-gray-700 mb-1" id="loadingText">Menganalisis...</h3>
-            <p class="text-sm text-gray-500" id="loadingSub">Menghubungi API...</p>
-        </div>
-
-        <!-- Results -->
-        <div id="resultsSection" class="hidden glass-effect rounded-2xl p-4 sm:p-6 shadow-2xl">
-            <div class="flex items-center justify-between mb-4 border-b pb-3">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                        <i class="fas fa-check text-sm"></i>
+            <div id="resultCard" class="result-card">
+                <div class="result-header">
+                    <div class="result-icon">
+                        <i class="fas fa-check-circle"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm sm:text-base">Hasil</h3>
-                        <p class="text-xs text-gray-500" id="usedApi">API</p>
+                        <div class="result-title" id="resultTitle">Berhasil!</div>
                     </div>
                 </div>
-                <button id="closeResults" class="w-8 h-8 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="result-message" id="resultMessage">
+                    Like berhasil ditambahkan ke video Anda.
+                </div>
+                <div id="successDetails" class="success-details" style="display: none;">
+                    <h4><i class="fas fa-check-double"></i> Detail Sukses:</h4>
+                    <ul id="successList"></ul>
+                </div>
+                <div id="errorDetails" class="error-details" style="display: none;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Detail Error:</h4>
+                    <ul id="errorList"></ul>
+                </div>
+                <div id="cooldownTimer" class="cooldown-timer" style="display: none;">
+                    <h4><i class="fas fa-clock"></i> Mohon Tunggu</h4>
+                    <div class="timer-display" id="timerDisplay">00:00</div>
+                    <div class="timer-text">Silakan coba lagi setelah waktu cooldown selesai</div>
+                </div>
+                <details class="debug-info" id="debugInfo" style="display: none;">
+                    <summary>Debug Information</summary>
+                    <div class="debug-content" id="debugContent"></div>
+                </details>
             </div>
-            <div id="resultsContent" class="space-y-3"></div>
         </div>
 
-        <!-- Error -->
-        <div id="errorSection" class="hidden glass-effect rounded-2xl p-6 shadow-2xl border-l-4 border-red-500 mb-6">
-            <div class="flex items-center space-x-2 mb-2">
-                <i class="fas fa-exclamation-triangle text-red-500"></i>
-                <h3 class="font-bold text-gray-800">Gagal</h3>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                <div class="stat-number" id="statSpeed">0.5s</div>
+                <div class="stat-label">Proses Cepat</div>
             </div>
-            <p id="errorMessage" class="text-sm text-gray-600 mb-3">Terjadi kesalahan</p>
-            <button id="retryBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">
-                <i class="fas fa-redo mr-1"></i>Coba Lagi
-            </button>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Aman & Terpercaya</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-number" id="statUsers">10K+</div>
+                <div class="stat-label">Pengguna Aktif</div>
+            </div>
         </div>
 
-    </main>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3>Proses Instan</h3>
+                <p>Like ditambahkan dalam hitungan detik setelah Anda mengirimkan URL video.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3>Keamanan Terjamin</h3>
+                <p>Tidak perlu login atau password. Cukup masukkan URL video Anda.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <h3>Tanpa Batas</h3>
+                <p>Gunakan layanan ini kapan saja tanpa batasan penggunaan harian.</p>
+            </div>
+        </div>
+    </div>
 
-    <!-- Footer -->
-    <footer class="mt-12 bg-white bg-opacity-10 backdrop-blur-lg text-white py-6">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-sm mb-1">&copy; 2024 AllDownloader</p>
-            <p class="text-xs opacity-75">Powered by danzy.web.id API</p>
+    <footer>
+        <p>© 2024 TikBoost. Dibuat dengan <i class="fas fa-heart" style="color: var(--primary);"></i> untuk komunitas TikTok.</p>
+        <div class="creator-highlight">
+            <i class="fas fa-code"></i>
+            <span>Developed by Ridzz</span>
         </div>
     </footer>
 
+    <div id="toast" class="toast">
+        <i class="fas fa-info-circle toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Info</div>
+            <div class="toast-message" id="toastMessage">Message</div>
+        </div>
+    </div>
+
     <script>
-        // ============================================
-        // API CONFIGURATION - ORIGINAL PARSER (WORKING)
-        // ============================================
-        
-        const API_CONFIG = {
-            // TIKTOK - API LAMA (TETAP)
-            tiktok: {
-                primary: {
-                    name: 'tikwm.com',
-                    url: 'https://tikwm.com/api/',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => ({
-                        success: d.code === 0,
-                        videoUrl: d.data?.play,
-                        audioUrl: d.data?.music,
-                        thumbnail: d.data?.cover,
-                        author: d.data?.author?.nickname,
-                        title: d.data?.title
-                    })
-                },
-                backup: {
-                    name: 'snapx.cab',
-                    url: 'https://snapx.cab/api/tiktok',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => ({
-                        success: !!d.url,
-                        videoUrl: d.url,
-                        audioUrl: d.audioUrl,
-                        thumbnail: d.thumbnail,
-                        author: d.author,
-                        title: d.title
-                    })
-                }
-            },
-            
-            // YOUTUBE - ORIGINAL WORKING PARSER
-            youtube: {
-                mp4: {
-                    name: 'danzy.web.id (MP4)',
-                    url: 'https://api.danzy.web.id/api/download/ytmp4',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => ({
-                        success: d.status === true || d.success === true || !!d.result || !!d.data,
-                        title: d.result?.title || d.data?.title || d.title || 'YouTube Video',
-                        thumbnail: d.result?.thumbnail || d.data?.thumbnail || d.thumbnail,
-                        downloadUrl: d.result?.url || d.result?.link || d.data?.url || d.data?.link || d.url,
-                        quality: d.result?.quality || d.data?.quality || 'HD',
-                        format: 'mp4'
-                    })
-                },
-                mp3: {
-                    name: 'danzy.web.id (MP3)',
-                    url: 'https://api.danzy.web.id/api/download/ytmp3',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => ({
-                        success: d.status === true || d.success === true || !!d.result || !!d.data,
-                        title: d.result?.title || d.data?.title || d.title || 'YouTube Audio',
-                        thumbnail: d.result?.thumbnail || d.data?.thumbnail || d.thumbnail,
-                        downloadUrl: d.result?.url || d.result?.link || d.data?.url || d.data?.link || d.url,
-                        quality: 'MP3',
-                        format: 'mp3'
-                    })
-                }
-            },
-            
-            // INSTAGRAM - ORIGINAL
-            instagram: {
-                primary: {
-                    name: 'danzy.web.id',
-                    url: 'https://api.danzy.web.id/api/download/instagram',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => {
-                        const result = d.result || d.data;
-                        const items = Array.isArray(result) ? result : (result ? [result] : []);
-                        
-                        return {
-                            success: items.length > 0 && (items[0].url || items[0].link || items[0].src),
-                            items: items.map(i => ({
-                                type: i.type || (i.url?.includes('.mp4') ? 'video' : 'image'),
-                                url: i.url || i.link || i.src,
-                                thumbnail: i.thumbnail || i.url
-                            })).filter(i => i.url)
-                        };
-                    }
-                }
-            },
-            
-            // FACEBOOK - ORIGINAL
-            facebook: {
-                primary: {
-                    name: 'danzy.web.id',
-                    url: 'https://api.danzy.web.id/api/download/facebook',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => {
-                        const result = d.result || d.data;
-                        const hd = result?.hd || result?.url || result?.link;
-                        const sd = result?.sd;
-                        
-                        return {
-                            success: !!(hd || sd),
-                            title: result?.title || d.title || 'Facebook Video',
-                            thumbnail: result?.thumbnail || d.thumbnail,
-                            formats: [
-                                { quality: 'HD', url: hd },
-                                { quality: 'SD', url: sd }
-                            ].filter(f => f.url)
-                        };
-                    }
-                }
-            },
-            
-            // MEDIAFIRE - ORIGINAL WORKING PARSER
-            mediafire: {
-                primary: {
-                    name: 'danzy.web.id',
-                    url: 'https://api.danzy.web.id/api/download/mediafire',
-                    method: 'GET',
-                    params: (u) => `?url=${encodeURIComponent(u)}`,
-                    parser: (d) => ({
-                        success: d.status === true || d.success === true || !!(d.result?.url || d.data?.url),
-                        filename: d.result?.filename || d.data?.filename || d.result?.name || d.data?.name || d.filename || 'File',
-                        size: d.result?.size || d.data?.size || d.size || 'Unknown',
-                        downloadUrl: d.result?.url || d.result?.link || d.data?.url || d.data?.link || d.url
-                    })
-                }
-            },
-            
-            // PINTEREST - DISABLED (API TIDAK STABIL)
-            pinterest: null,
-            
-            // SPOTIFY - DISABLED (API TIDAK STABIL)
-            spotify: null
-        };
+        let cooldownInterval = null;
+        let isCooldown = false;
+        let lastResponseData = null;
 
-        // ============================================
-        // STATE
-        // ============================================
-        
-        let currentPlatform = 'tiktok';
-        let lastUrl = '';
-        let ytFormat = 'mp4';
-        let currentApiUsed = '';
-
-        const hints = {
-            tiktok: 'Video TikTok tanpa watermark',
-            youtube: 'Pilih format MP3 atau MP4',
-            instagram: 'Foto, video, reels, carousel',
-            pinterest: 'Service temporarily unavailable',
-            spotify: 'Service temporarily unavailable',
-            mediafire: 'Direct download file',
-            facebook: 'Video Facebook HD/SD'
-        };
-
-        const placeholders = {
-            tiktok: 'https://www.tiktok.com/@username/video/...',
-            youtube: 'https://youtube.com/watch?v=...',
-            instagram: 'https://instagram.com/p/...',
-            pinterest: 'https://pinterest.com/pin/...',
-            spotify: 'https://open.spotify.com/track/...',
-            mediafire: 'https://mediafire.com/file/...',
-            facebook: 'https://facebook.com/watch?v=...'
-        };
-
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing AllDownloader...');
-            
-            // Attach platform click events
-            document.querySelectorAll('.platform-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    const platform = this.getAttribute('data-platform');
-                    if (platform === 'pinterest' || platform === 'spotify') {
-                        showToast('Fitur ini sedang dalam perbaikan', 'error');
-                        return;
-                    }
-                    selectPlatform(platform, this);
-                });
-            });
-            
-            // Attach other events
-            document.getElementById('searchBtn').addEventListener('click', startDownload);
-            document.getElementById('urlInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') startDownload();
-            });
-            document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
-            document.getElementById('btnMp4').addEventListener('click', () => setYtFormat('mp4'));
-            document.getElementById('btnMp3').addEventListener('click', () => setYtFormat('mp3'));
-            document.getElementById('closeResults').addEventListener('click', clearResults);
-            document.getElementById('retryBtn').addEventListener('click', retryDownload);
-            
-            // Set initial active
-            const tiktokCard = document.querySelector('[data-platform="tiktok"]');
-            if (tiktokCard) tiktokCard.classList.add('active');
+        // Animate stats on load
+        window.addEventListener('load', () => {
+            animateValue('statSpeed', 0, 0.5, 1000, 's');
+            animateValue('statUsers', 0, 10, 1500, 'K+');
+            checkApiStatus();
         });
 
-        // ============================================
-        // UI FUNCTIONS
-        // ============================================
-        
-        function selectPlatform(platform, el) {
-            console.log('Selecting platform:', platform);
+        function animateValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const minTimer = 50;
+            let stepTime = Math.abs(Math.floor(duration / range));
+            stepTime = Math.max(stepTime, minTimer);
             
-            // FIX: Clear URL dan results saat ganti platform
-            document.getElementById('urlInput').value = '';
-            clearResults();
+            let startTime = new Date().getTime();
+            let endTime = startTime + duration;
+            let timer;
             
-            currentPlatform = platform;
-            
-            // Update visual active state
-            document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            
-            // Update UI text
-            document.getElementById('platformLabel').textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
-            document.getElementById('hintText').textContent = hints[platform];
-            document.getElementById('urlInput').placeholder = placeholders[platform];
-            
-            // Show/hide YouTube selector
-            document.getElementById('ytSelector').style.display = platform === 'youtube' ? 'flex' : 'none';
-            
-            // Reset format
-            if (platform === 'youtube') setYtFormat('mp4');
-        }
-
-        function setYtFormat(fmt) {
-            ytFormat = fmt;
-            document.getElementById('btnMp4').className = fmt === 'mp4' 
-                ? 'flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold'
-                : 'flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold';
-            document.getElementById('btnMp3').className = fmt === 'mp3'
-                ? 'flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold'
-                : 'flex-1 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold';
-        }
-
-        async function pasteFromClipboard() {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById('urlInput').value = text;
-                showToast('URL dipaste!', 'success');
-            } catch (err) {
-                showToast('Clipboard tidak diizinkan', 'error');
-            }
-        }
-
-        // ============================================
-        // API FUNCTIONS (ORIGINAL WORKING VERSION)
-        // ============================================
-        
-        async function tryApi(config, url) {
-            const fullUrl = config.url + config.params(url);
-            console.log(`Trying ${config.name}:`, fullUrl);
-            
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
-            
-            try {
-                const res = await fetch(fullUrl, {
-                    method: config.method,
-                    signal: controller.signal,
-                    headers: { 'Accept': 'application/json' }
-                });
-                clearTimeout(timeout);
-                
-                console.log(`${config.name} HTTP Status:`, res.status);
-                
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
-                const data = await res.json();
-                console.log(`${config.name} Response:`, data);
-                
-                const parsed = config.parser(data);
-                console.log(`${config.name} Parsed:`, parsed);
-                
-                if (!parsed.success) throw new Error('Parser returned success=false');
-                
-                return { success: true, data: parsed, source: config.name };
-                
-            } catch (err) {
-                console.error(`${config.name} Error:`, err);
-                return { success: false, error: err.message, source: config.name };
-            }
-        }
-
-        async function fetchWithBackup(platform, url) {
-            const cfg = API_CONFIG[platform];
-            if (!cfg) throw new Error('Platform tidak didukung');
-            
-            // YouTube handling
-            if (platform === 'youtube') {
-                const ytConfig = ytFormat === 'mp4' ? cfg.mp4 : cfg.mp3;
-                document.getElementById('loadingSub').textContent = `Mencoba YouTube ${ytFormat.toUpperCase()}...`;
-                
-                const result = await tryApi(ytConfig, url);
-                
-                if (!result.success) throw new Error(`YouTube ${ytFormat.toUpperCase()} gagal: ${result.error}`);
-                
-                currentApiUsed = result.source;
-                return result.data;
-            }
-            
-            // TikTok dengan backup
-            if (platform === 'tiktok') {
-                const apis = [cfg.primary, cfg.backup];
-                for (let i = 0; i < apis.length; i++) {
-                    document.getElementById('loadingSub').textContent = `Mencoba ${apis[i].name}...`;
-                    const result = await tryApi(apis[i], url);
-                    
-                    if (result.success) {
-                        currentApiUsed = result.source;
-                        if (i > 0) showToast(`Menggunakan ${result.source}`, 'info');
-                        return result.data;
-                    }
+            function run() {
+                let now = new Date().getTime();
+                let remaining = Math.max((endTime - now) / duration, 0);
+                let value = Math.round(end - (remaining * range));
+                obj.innerHTML = value + suffix;
+                if (value == end) {
+                    clearInterval(timer);
                 }
-                throw new Error('Semua API TikTok gagal');
             }
             
-            // Platform lain (hanya 1 API)
-            const api = cfg.primary;
-            document.getElementById('loadingSub').textContent = `Mencoba ${api.name}...`;
-            
-            const result = await tryApi(api, url);
-            
-            if (!result.success) throw new Error(`${api.name} gagal: ${result.error}`);
-            
-            currentApiUsed = result.source;
-            return result.data;
+            timer = setInterval(run, stepTime);
+            run();
         }
 
-        // ============================================
-        // MAIN FUNCTION
-        // ============================================
-        
-        async function startDownload() {
-            const url = document.getElementById('urlInput').value.trim();
-            if (!url) return showToast('Masukkan URL!', 'error');
-            
-            lastUrl = url;
-            document.getElementById('loadingSection').classList.remove('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
-            document.getElementById('errorSection').classList.add('hidden');
+        async function checkApiStatus() {
+            const statusEl = document.getElementById('apiStatus');
+            const statusText = document.getElementById('apiStatusText');
             
             try {
-                const data = await fetchWithBackup(currentPlatform, url);
-                document.getElementById('loadingSection').classList.add('hidden');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
                 
-                showResults(data);
-                document.getElementById('usedApi').textContent = `Via: ${currentApiUsed}`;
-                showToast('Berhasil!', 'success');
+                const response = await fetch('https://api.danzy.web.id/', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
                 
-            } catch (err) {
-                console.error('Download error:', err);
-                document.getElementById('loadingSection').classList.add('hidden');
-                document.getElementById('errorSection').classList.remove('hidden');
-                document.getElementById('errorMessage').textContent = err.message;
-                showToast('Gagal: ' + err.message, 'error');
+                if (response.ok) {
+                    statusEl.classList.remove('offline');
+                    statusText.textContent = 'API Online';
+                } else {
+                    throw new Error('API Error');
+                }
+            } catch (e) {
+                statusEl.classList.add('offline');
+                statusText.textContent = 'API Offline';
             }
         }
 
-        // ============================================
-        // RENDER FUNCTIONS (ORIGINAL)
-        // ============================================
-        
-        function showResults(data) {
-            const div = document.getElementById('resultsSection');
-            const content = document.getElementById('resultsContent');
-            div.classList.remove('hidden');
+        function startCooldown(seconds) {
+            isCooldown = true;
+            const btn = document.getElementById('submitBtn');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const cooldownDiv = document.getElementById('cooldownTimer');
             
-            const renderers = {
-                tiktok: () => `
-                    <div class="result-card bg-white rounded-xl p-4 shadow">
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <div class="sm:w-1/3">
-                                <div class="aspect-[9/16] bg-gray-100 rounded-lg overflow-hidden">
-                                    ${data.thumbnail ? 
-                                        `<img src="${data.thumbnail}" class="w-full h-full object-cover" onerror="this.style.display='none'">` : 
-                                        '<div class="flex items-center justify-center h-full text-gray-400"><i class="fas fa-video text-3xl"></i></div>'
-                                    }
-                                </div>
-                            </div>
-                            <div class="sm:w-2/3 space-y-3">
-                                <h4 class="font-bold text-gray-800 text-sm">${data.title || 'TikTok Video'}</h4>
-                                <p class="text-xs text-gray-500">${data.author || '@user'}</p>
-                                <div class="flex gap-2">
-                                    <span class="bg-gradient-to-r from-green-400 to-green-600 text-white px-2 py-1 rounded-full text-xs">HD</span>
-                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">No WM</span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <a href="${data.videoUrl}" target="_blank" rel="noopener noreferrer" class="download-btn text-white py-2 rounded-lg text-center text-sm font-semibold block">
-                                        <i class="fas fa-video mr-1"></i>Video
-                                    </a>
-                                    ${data.audioUrl ? `
-                                    <a href="${data.audioUrl}" target="_blank" rel="noopener noreferrer" class="bg-gray-100 text-gray-700 py-2 rounded-lg text-center text-sm font-semibold hover:bg-gray-200 block">
-                                        <i class="fas fa-music mr-1"></i>Audio
-                                    </a>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>`,
-                
-                youtube: () => `
-                    <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-red-600">
-                        <div class="flex gap-4">
-                            <div class="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                                ${data.thumbnail ? 
-                                    `<img src="${data.thumbnail}" class="w-full h-full object-cover" onerror="this.style.display='none'">` : 
-                                    '<div class="flex items-center justify-center h-full text-gray-400"><i class="fab fa-youtube text-2xl"></i></div>'
-                                }
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-gray-800 text-sm line-clamp-2 mb-2">${data.title || 'YouTube Video'}</h4>
-                                <span class="${data.format === 'mp3' ? 'bg-gradient-to-r from-orange-400 to-yellow-400' : 'bg-gradient-to-r from-green-400 to-emerald-500'} text-white px-2 py-1 rounded-full text-xs">${data.quality || 'HD'}</span>
-                                <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="mt-2 block w-full download-btn text-white py-2 rounded-lg text-center text-sm font-semibold">
-                                    <i class="fas fa-download mr-1"></i>Unduh ${data.format?.toUpperCase() || 'VIDEO'}
-                                </a>
-                            </div>
-                        </div>
-                    </div>`,
-                
-                instagram: () => data.items && data.items.length > 0 ? `
-                    <div class="result-card bg-white rounded-xl p-4 shadow">
-                        <h4 class="font-bold text-gray-800 mb-3 text-sm">${data.items.length} Media Ditemukan</h4>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                            ${data.items.map((item, i) => `
-                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group block">
-                                    ${item.type === 'video' ? '<div class="absolute inset-0 flex items-center justify-center z-10"><i class="fas fa-play-circle text-white text-2xl drop-shadow-lg"></i></div>' : ''}
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <i class="fas fa-download text-white"></i>
-                                    </div>
-                                    <div class="absolute top-1 right-1 bg-black text-white text-xs px-1 rounded z-20">${i + 1}</div>
-                                </a>
-                            `).join('')}
-                        </div>
-                    </div>` : '<div class="text-red-500 text-center py-4">Tidak ada media ditemukan</div>',
-                
-                facebook: () => data.formats && data.formats.length > 0 ? `
-                    <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-blue-600">
-                        <h4 class="font-bold text-gray-800 text-sm mb-3 line-clamp-2">${data.title || 'Facebook Video'}</h4>
-                        ${data.thumbnail ? `
-                        <div class="mb-3 aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                            <img src="${data.thumbnail}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-                        </div>` : ''}
-                        <div class="grid grid-cols-2 gap-2">
-                            ${data.formats.map(f => `
-                                <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="bg-blue-50 border-2 border-blue-200 hover:border-blue-400 rounded-lg p-3 text-center transition block">
-                                    <div class="font-bold text-blue-700 text-lg">${f.quality}</div>
-                                    <div class="text-xs text-blue-500">Kualitas ${f.quality}</div>
-                                </a>
-                            `).join('')}
-                        </div>
-                    </div>` : '<div class="text-red-500 text-center py-4">Format tidak ditemukan</div>',
-                
-                mediafire: () => data.downloadUrl ? `
-                    <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-blue-500">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                <i class="fas fa-file-archive text-xl"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-gray-800 text-sm truncate">${data.filename}</h4>
-                                <p class="text-xs text-gray-500">${data.size}</p>
-                            </div>
-                        </div>
-                        <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="block w-full download-btn text-white py-3 rounded-lg text-center font-semibold">
-                            <i class="fas fa-cloud-download-alt mr-2"></i>Download File
-                        </a>
-                    </div>` : '<div class="text-red-500 text-center py-4">Link download tidak ditemukan</div>'
-            };
+            btn.disabled = true;
+            cooldownDiv.style.display = 'block';
             
-            content.innerHTML = (renderers[currentPlatform] || (() => '<div class="text-red-500 text-center py-4">Platform tidak didukung</div>'))();
-            div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            let remaining = seconds;
+            
+            updateTimerDisplay(remaining);
+            
+            cooldownInterval = setInterval(() => {
+                remaining--;
+                updateTimerDisplay(remaining);
+                
+                if (remaining <= 0) {
+                    clearInterval(cooldownInterval);
+                    isCooldown = false;
+                    btn.disabled = false;
+                    cooldownDiv.style.display = 'none';
+                    showToast('Cooldown selesai! Anda bisa mencoba lagi.', 'success');
+                }
+            }, 1000);
         }
 
-        function clearResults() {
-            document.getElementById('resultsSection').classList.add('hidden');
-            document.getElementById('errorSection').classList.add('hidden');
+        function updateTimerDisplay(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function retryDownload() {
-            if (lastUrl) {
-                document.getElementById('urlInput').value = lastUrl;
-                startDownload();
+        function parseCooldownFromMessage(message) {
+            const patterns = [
+                { regex: /(\d+)\s*menit/i, multiplier: 60 },
+                { regex: /(\d+)\s*minute/i, multiplier: 60 },
+                { regex: /(\d+)\s*detik/i, multiplier: 1 },
+                { regex: /(\d+)\s*second/i, multiplier: 1 },
+                { regex: /(\d+)\s*jam/i, multiplier: 3600 },
+                { regex: /(\d+)\s*hour/i, multiplier: 3600 }
+            ];
+            
+            for (let pattern of patterns) {
+                const match = message.match(pattern.regex);
+                if (match) {
+                    return parseInt(match[1]) * pattern.multiplier;
+                }
+            }
+            
+            const shortMatch = message.match(/(\d+)([msh])/i);
+            if (shortMatch) {
+                const value = parseInt(shortMatch[1]);
+                const unit = shortMatch[2].toLowerCase();
+                if (unit === 'm') return value * 60;
+                if (unit === 'h') return value * 3600;
+                return value;
+            }
+            
+            return 300;
+        }
+
+        function isSuccessResponse(data) {
+            // Cek berbagai kemungkinan format success
+            if (!data) return false;
+            
+            // Cek field 'success'
+            if (data.success === true || data.success === "Success") return true;
+            
+            // Cek field 'status'
+            if (data.status === true || data.status === "success" || data.status === "ok") return true;
+            
+            // Cek field 'result.success'
+            if (data.result && (data.result.success === true || data.result.success === "Success")) return true;
+            
+            // Cek field 'data.status'
+            if (data.data && (data.data.status === true || data.data.status === "success")) return true;
+            
+            // Cek field 'data.result.success'
+            if (data.data && data.data.result && 
+                (data.data.result.success === true || data.data.result.success === "Success")) return true;
+            
+            // Cek field 'creator' (indikasi response sukses dari API Danzy)
+            if (data.creator || (data.data && data.data.creator)) return true;
+            
+            // Cek field 'message' mengandung kata sukses
+            const msg = (data.message || '').toLowerCase();
+            if (msg.includes('success') || msg.includes('sukses') || msg.includes('berhasil')) return true;
+            
+            return false;
+        }
+
+        function getErrorType(message) {
+            const msg = message.toLowerCase();
+            
+            if (msg.includes('cooldown') || msg.includes('tunggu') || msg.includes('wait') || 
+                msg.includes('limit') || msg.includes('terlalu sering') || msg.includes('many request')) {
+                return 'cooldown';
+            }
+            if (msg.includes('url') || msg.includes('link') || msg.includes('invalid') || 
+                msg.includes('tidak valid') || msg.includes('not found')) {
+                return 'invalid_url';
+            }
+            if (msg.includes('server') || msg.includes('maintenance') || msg.includes('overload') || 
+                msg.includes('busy') || msg.includes('503') || msg.includes('502')) {
+                return 'server';
+            }
+            if (msg.includes('private') || msg.includes('privat') || msg.includes('not available')) {
+                return 'private_video';
+            }
+            if (msg.includes('block') || msg.includes('banned') || msg.includes('restrict')) {
+                return 'blocked';
+            }
+            return 'unknown';
+        }
+
+        async function submitLike() {
+            if (isCooldown) {
+                showToast('Mohon tunggu cooldown selesai', 'warning');
+                return;
+            }
+
+            const urlInput = document.getElementById('tiktokUrl');
+            const btn = document.getElementById('submitBtn');
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const successDetails = document.getElementById('successDetails');
+            const successList = document.getElementById('successList');
+            const errorDetails = document.getElementById('errorDetails');
+            const errorList = document.getElementById('errorList');
+            const cooldownDiv = document.getElementById('cooldownTimer');
+            const debugInfo = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showToast('Mohon masukkan URL TikTok terlebih dahulu!', 'error');
+                urlInput.focus();
+                return;
+            }
+
+            if (!url.includes('tiktok.com')) {
+                showToast('URL tidak valid. Pastikan URL dari TikTok!', 'error');
+                return;
+            }
+
+            // Reset tampilan
+            resultCard.classList.remove('show', 'success', 'error', 'warning');
+            successDetails.style.display = 'none';
+            errorDetails.style.display = 'none';
+            cooldownDiv.style.display = 'none';
+            debugInfo.style.display = 'none';
+            successList.innerHTML = '';
+            errorList.innerHTML = '';
+
+            // Loading state
+            btn.classList.add('loading');
+            btn.innerHTML = 'Memproses...';
+
+            const startTime = Date.now();
+
+            try {
+                const apiUrl = `https://api.danzy.web.id/api/tools/ttlike?url=${encodeURIComponent(url)}`;
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                
+                const response = await fetch(apiUrl, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                const responseTime = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                let data;
+                const responseText = await response.text();
+                
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    data = { 
+                        success: false, 
+                        message: 'Invalid response from server',
+                        rawResponse: responseText.substring(0, 500)
+                    };
+                }
+
+                // Simpan untuk debug
+                lastResponseData = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    responseTime: responseTime,
+                    data: data,
+                    rawResponse: responseText
+                };
+
+                // PERBAIKAN UTAMA: Cek sukses dengan fungsi yang lebih komprehensif
+                const isSuccess = isSuccessResponse(data);
+                
+                resultCard.classList.add('show');
+                
+                if (isSuccess) {
+                    // ==================== SUKSES ====================
+                    resultCard.classList.add('success');
+                    resultCard.classList.remove('error', 'warning');
+                    resultCard.querySelector('.result-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+                    resultTitle.textContent = 'Berhasil! 🎉';
+                    
+                    // Ambil pesan sukses
+                    let successMsg = data.message || 
+                                   (data.result && data.result.message) || 
+                                   (data.data && data.data.message) ||
+                                   'Like berhasil ditambahkan ke video TikTok Anda!';
+                    
+                    resultMessage.innerHTML = `
+                        <strong>${successMsg}</strong><br>
+                        <small style="color: var(--secondary);">Response time: ${responseTime}s</small>
+                    `;
+                    
+                    // Tampilkan detail sukses
+                    successDetails.style.display = 'block';
+                    successList.innerHTML = `
+                        <li>Creator: ${data.creator || data.data?.creator || 'Danzz'}</li>
+                        <li>Status: ${data.status || data.data?.status || 'Success'}</li>
+                        <li>Response Time: ${responseTime} detik</li>
+                        <li>Video URL: ${url.substring(0, 50)}...</li>
+                    `;
+                    
+                    showToast('Like berhasil ditambahkan!', 'success');
+                    urlInput.value = '';
+                    
+                } else {
+                    // ==================== ERROR ====================
+                    throw new Error(data.message || 'Terjadi kesalahan pada server');
+                }
+
+            } catch (error) {
+                const errorMsg = error.message || 'Terjadi kesalahan yang tidak diketahui';
+                const errorType = getErrorType(errorMsg);
+                
+                resultCard.classList.add('show', 'error');
+                resultCard.classList.remove('success', 'warning');
+                resultCard.querySelector('.result-icon').innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                
+                // Tampilkan debug info
+                if (lastResponseData) {
+                    debugInfo.style.display = 'block';
+                    debugContent.textContent = JSON.stringify(lastResponseData, null, 2);
+                }
+
+                switch(errorType) {
+                    case 'cooldown':
+                        const cooldownTime = parseCooldownFromMessage(errorMsg);
+                        resultTitle.textContent = 'Cooldown Aktif ⏱️';
+                        resultMessage.innerHTML = `
+                            <strong>Anda terlalu sering menggunakan layanan ini.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>Cooldown diperlukan untuk mencegah spam dan overload server</li>
+                            <li>Setiap pengguna memiliki batas penggunaan untuk menjaga stabilitas</li>
+                            <li>Silakan tunggu waktu yang ditentukan sebelum mencoba lagi</li>
+                            <li>Jangan refresh halaman saat countdown berjalan</li>
+                        `;
+                        startCooldown(cooldownTime);
+                        showToast(`Cooldown: ${Math.floor(cooldownTime/60)} menit`, 'warning', 'Mohon Tunggu');
+                        break;
+                        
+                    case 'invalid_url':
+                        resultTitle.textContent = 'URL Tidak Valid ❌';
+                        resultMessage.innerHTML = `
+                            <strong>URL TikTok yang Anda masukkan tidak valid.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>Pastikan URL dimulai dengan <code>https://tiktok.com/</code> atau <code>https://www.tiktok.com/</code></li>
+                            <li>Contoh URL yang benar: <code>https://www.tiktok.com/@username/video/1234567890</code></li>
+                            <li>Pastikan video tidak di-private atau dihapus</li>
+                            <li>Jangan gunakan URL dari aplikasi TikTok Lite atau versi modifikasi</li>
+                            <li>Pastikan tidak ada spasi di awal atau akhir URL</li>
+                        `;
+                        showToast('Periksa kembali URL TikTok Anda!', 'error', 'URL Error');
+                        break;
+                        
+                    case 'private_video':
+                        resultTitle.textContent = 'Video Private 🔒';
+                        resultMessage.innerHTML = `
+                            <strong>Video ini tidak dapat diakses.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>Video mungkin diatur sebagai private oleh pemiliknya</li>
+                            <li>Video mungkin sudah dihapus atau ditangguhkan</li>
+                            <li>Pastikan Anda menggunakan URL video yang publik</li>
+                            <li>Coba buka URL di browser untuk memastikan video bisa diakses</li>
+                        `;
+                        showToast('Video tidak dapat diakses!', 'error', 'Private Video');
+                        break;
+                        
+                    case 'server':
+                        resultTitle.textContent = 'Server Error 🔧';
+                        resultMessage.innerHTML = `
+                            <strong>Server sedang mengalami gangguan teknis.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>Server API sedang maintenance atau mengalami overload</li>
+                            <li>Traffic terlalu tinggi saat ini, silakan coba lagi dalam 5-10 menit</li>
+                            <li>Jika masalah berlanjut lebih dari 1 jam, hubungi developer Ridzz</li>
+                            <li>Anda bisa cek status API dengan klik indicator "API Online" di atas</li>
+                        `;
+                        showToast('Server sedang sibuk, coba lagi nanti!', 'error', 'Server Error');
+                        break;
+                        
+                    case 'blocked':
+                        resultTitle.textContent = 'Akses Diblokir 🚫';
+                        resultMessage.innerHTML = `
+                            <strong>Akses Anda dibatasi oleh sistem.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>IP Anda mungkin terdeteksi melakukan aktivitas mencurigakan</li>
+                            <li>Terlalu banyak request dalam waktu singkat</li>
+                            <li>Gunakan VPN jika yakin ini kesalahan sistem</li>
+                            <li>Hubungi Ridzz untuk whitelist IP Anda</li>
+                        `;
+                        showToast('Akses diblokir!', 'error', 'Blocked');
+                        break;
+                        
+                    default:
+                        resultTitle.textContent = 'Error Tidak Dikenal ⚠️';
+                        resultMessage.innerHTML = `
+                            <strong>Terjadi kesalahan yang tidak terduga.</strong><br>
+                            <span style="color: var(--primary);">${errorMsg}</span>
+                        `;
+                        errorDetails.style.display = 'block';
+                        errorList.innerHTML = `
+                            <li>Pastikan koneksi internet Anda stabil</li>
+                            <li>Coba refresh halaman ini (F5)</li>
+                            <li>Clear cache browser dan coba lagi</li>
+                            <li>Jika error berlanjut, screenshot pesan error dan laporkan ke Ridzz</li>
+                            <li>Detail teknis tersedia di bagian "Debug Information" di bawah</li>
+                        `;
+                        showToast('Error: ' + errorMsg.substring(0, 50), 'error', 'Error');
+                }
+            } finally {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-heart"></i> Tambah Like Sekarang';
             }
         }
 
-        function showToast(msg, type = 'success') {
+        function showToast(message, type = 'success', title = '') {
             const toast = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            const text = document.getElementById('toastMessage');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = toast.querySelector('.toast-icon');
             
-            text.textContent = msg;
-            icon.className = `fas ${
-                type === 'error' ? 'fa-exclamation-circle text-red-500' : 
-                type === 'info' ? 'fa-info-circle text-blue-500' : 
-                'fa-check-circle text-green-500'
-            } text-xl`;
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
             
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            switch(type) {
+                case 'success':
+                    toastIcon.className = 'fas fa-check-circle toast-icon';
+                    toastTitle.textContent = title || 'Berhasil!';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fas fa-times-circle toast-icon';
+                    toastTitle.textContent = title || 'Error!';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fas fa-exclamation-triangle toast-icon';
+                    toastTitle.textContent = title || 'Perhatian!';
+                    break;
+                default:
+                    toastIcon.className = 'fas fa-info-circle toast-icon';
+                    toastTitle.textContent = title || 'Info';
+            }
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
         }
-    </script>
 
+        // Enter key support
+        document.getElementById('tiktokUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitLike();
+            }
+        });
+
+        // Cek status API setiap 30 detik
+        setInterval(checkApiStatus, 30000);
+    </script>
 </body>
 </html>
