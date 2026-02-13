@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Downloader - Fixed API Edition</title>
+    <title>All Downloader - Fixed Download Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -89,22 +89,6 @@
         }
         
         .toast.show { transform: translateX(0); }
-        
-        /* Debug console */
-        .debug-console {
-            background: #1f2937;
-            color: #10b981;
-            font-family: monospace;
-            font-size: 11px;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            max-height: 150px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .debug-console.show { display: block; }
     </style>
 </head>
 <body class="antialiased">
@@ -125,7 +109,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-800">AllDownloader</h1>
-                        <p class="text-xs text-gray-500">Debug Mode</p>
+                        <p class="text-xs text-gray-500">Fixed Download Edition</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -143,7 +127,7 @@
         <div class="text-center mb-8 text-white">
             <h2 class="text-3xl sm:text-4xl font-bold mb-3">Universal Downloader</h2>
             <p class="text-base opacity-90 max-w-xl mx-auto">
-                Dengan sistem debug untuk troubleshooting
+                Klik tombol download untuk mengunduh file langsung
             </p>
         </div>
 
@@ -272,9 +256,6 @@
                         <i class="fas fa-music mr-1"></i>MP3 Audio
                     </button>
                 </div>
-                
-                <!-- Debug Console -->
-                <div id="debugConsole" class="debug-console"></div>
             </div>
         </div>
 
@@ -322,28 +303,17 @@
     <footer class="mt-12 bg-white bg-opacity-10 backdrop-blur-lg text-white py-6">
         <div class="container mx-auto px-4 text-center">
             <p class="text-sm mb-1">&copy; 2024 AllDownloader</p>
-            <p class="text-xs opacity-75">With Debug Mode</p>
+            <p class="text-xs opacity-75">Fixed Download System</p>
         </div>
     </footer>
 
     <script>
         // ============================================
-        // DEBUG LOGGER
-        // ============================================
-        function debug(msg) {
-            console.log(msg);
-            const consoleDiv = document.getElementById('debugConsole');
-            consoleDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`;
-            consoleDiv.classList.add('show');
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        }
-
-        // ============================================
         // API CONFIGURATION 
         // ============================================
         
         const API_CONFIG = {
-            // TIKTOK - ORIGINAL (TIDAK DIUBAH)
+            // TIKTOK - ORIGINAL
             tiktok: {
                 primary: {
                     name: 'tikwm.com',
@@ -375,7 +345,7 @@
                 }
             },
             
-            // YOUTUBE - ORIGINAL (TIDAK DIUBAH)
+            // YOUTUBE - ORIGINAL
             youtube: {
                 mp4: {
                     name: 'danzy.web.id (MP4)',
@@ -407,7 +377,7 @@
                 }
             },
             
-            // INSTAGRAM - ORIGINAL (TIDAK DIUBAH)
+            // INSTAGRAM - ORIGINAL
             instagram: {
                 primary: {
                     name: 'danzy.web.id',
@@ -430,7 +400,7 @@
                 }
             },
             
-            // FACEBOOK - ORIGINAL (TIDAK DIUBAH)
+            // FACEBOOK - ORIGINAL
             facebook: {
                 primary: {
                     name: 'danzy.web.id',
@@ -455,7 +425,7 @@
                 }
             },
             
-            // MEDIAFIRE - ORIGINAL (TIDAK DIUBAH)
+            // MEDIAFIRE - ORIGINAL
             mediafire: {
                 primary: {
                     name: 'danzy.web.id',
@@ -471,9 +441,7 @@
                 }
             },
             
-            // ============================================
-            // SPOTIFY - DENGAN 4 BACKUP API (FIXED PARSER)
-            // ============================================
+            // SPOTIFY - DENGAN 4 BACKUP API
             spotify: [
                 {
                     name: 'danzy.web.id',
@@ -501,9 +469,7 @@
                 }
             ],
             
-            // ============================================
-            // PINTEREST - DENGAN 2 BACKUP API (FIXED PARSER)
-            // ============================================
+            // PINTEREST - DENGAN 2 BACKUP API
             pinterest: [
                 {
                     name: 'danzy.web.id',
@@ -519,39 +485,6 @@
                 }
             ]
         };
-
-        // ============================================
-        // FLEXIBLE PARSER UNTUK SPOTIFY & PINTEREST
-        // ============================================
-        
-        function parseSpotifyResponse(d) {
-            debug('Parsing Spotify response: ' + JSON.stringify(d).substring(0, 200));
-            
-            // Coba berbagai format response
-            const result = d.result || d.data || d;
-            
-            return {
-                success: !!(result?.url || result?.link || result?.downloadUrl || d.url),
-                title: result?.title || result?.name || d.title || 'Unknown Track',
-                artist: result?.artist || result?.artists || d.artist || 'Unknown Artist',
-                thumbnail: result?.thumbnail || result?.image || result?.cover || d.thumbnail,
-                downloadUrl: result?.url || result?.link || result?.downloadUrl || d.url || d.download
-            };
-        }
-        
-        function parsePinterestResponse(d) {
-            debug('Parsing Pinterest response: ' + JSON.stringify(d).substring(0, 200));
-            
-            // Coba berbagai format response
-            const result = d.result || d.data || d;
-            
-            return {
-                success: !!(result?.url || result?.link || result?.image || result?.downloadUrl || d.url),
-                title: result?.title || result?.description || result?.name || d.title || 'Pinterest Image',
-                downloadUrl: result?.url || result?.link || result?.image || result?.downloadUrl || d.url || d.download,
-                thumbnail: result?.thumbnail || result?.preview || result?.image || d.thumbnail
-            };
-        }
 
         // ============================================
         // STATE
@@ -587,8 +520,6 @@
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
-            debug('Initializing AllDownloader...');
-            
             // Attach platform click events
             document.querySelectorAll('.platform-card').forEach(card => {
                 card.addEventListener('click', function(e) {
@@ -618,8 +549,6 @@
         // ============================================
         
         function selectPlatform(platform, el) {
-            debug('Selecting platform: ' + platform);
-            
             // Clear URL dan results
             document.getElementById('urlInput').value = '';
             clearResults();
@@ -663,12 +592,38 @@
         }
 
         // ============================================
-        // API FUNCTIONS - FIXED
+        // PARSER FUNCTIONS
+        // ============================================
+        
+        function parseSpotifyResponse(d) {
+            const result = d.result || d.data || d;
+            
+            return {
+                success: !!(result?.url || result?.link || result?.downloadUrl || d.url),
+                title: result?.title || result?.name || d.title || 'Unknown Track',
+                artist: result?.artist || result?.artists || d.artist || 'Unknown Artist',
+                thumbnail: result?.thumbnail || result?.image || result?.cover || d.thumbnail,
+                downloadUrl: result?.url || result?.link || result?.downloadUrl || d.url || d.download
+            };
+        }
+        
+        function parsePinterestResponse(d) {
+            const result = d.result || d.data || d;
+            
+            return {
+                success: !!(result?.url || result?.link || result?.image || result?.downloadUrl || d.url),
+                title: result?.title || result?.description || result?.name || d.title || 'Pinterest Image',
+                downloadUrl: result?.url || result?.link || result?.image || result?.downloadUrl || d.url || d.download,
+                thumbnail: result?.thumbnail || result?.preview || result?.image || d.thumbnail
+            };
+        }
+
+        // ============================================
+        // API FUNCTIONS
         // ============================================
         
         async function tryApi(config, url, parser) {
             const fullUrl = config.url + config.params(url);
-            debug(`Trying ${config.name}: ${fullUrl}`);
             
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 15000);
@@ -678,34 +633,21 @@
                     method: config.method,
                     signal: controller.signal,
                     headers: { 
-                        'Accept': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    mode: 'cors'
+                        'Accept': 'application/json'
+                    }
                 });
                 clearTimeout(timeout);
                 
-                debug(`${config.name} HTTP Status: ${res.status}`);
-                
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 
                 const data = await res.json();
-                debug(`${config.name} Response received`);
-                
-                // Parse dengan parser yang diberikan
                 const parsed = parser ? parser(data) : config.parser(data);
-                debug(`${config.name} Parsed: success=${parsed.success}`);
                 
-                if (!parsed.success) {
-                    throw new Error('Invalid data structure');
-                }
+                if (!parsed.success) throw new Error('Invalid data');
                 
                 return { success: true, data: parsed, source: config.name };
                 
             } catch (err) {
-                debug(`${config.name} Error: ${err.message}`);
                 return { success: false, error: err.message, source: config.name };
             }
         }
@@ -743,12 +685,10 @@
                 throw new Error('Semua API TikTok gagal');
             }
             
-            // ============================================
-            // SPOTIFY - DENGAN FLEXIBLE PARSER
-            // ============================================
+            // Spotify dengan backup
             if (platform === 'spotify') {
                 for (let i = 0; i < cfg.length; i++) {
-                    document.getElementById('loadingSub').textContent = `Mencoba Spotify API ${i + 1}/${cfg.length} (${cfg[i].name})...`;
+                    document.getElementById('loadingSub').textContent = `Mencoba Spotify API ${i + 1}/${cfg.length}...`;
                     const result = await tryApi(cfg[i], url, parseSpotifyResponse);
                     
                     if (result.success) {
@@ -757,15 +697,13 @@
                         return result.data;
                     }
                 }
-                throw new Error('Semua API Spotify gagal (4 backup)');
+                throw new Error('Semua API Spotify gagal');
             }
             
-            // ============================================
-            // PINTEREST - DENGAN FLEXIBLE PARSER
-            // ============================================
+            // Pinterest dengan backup
             if (platform === 'pinterest') {
                 for (let i = 0; i < cfg.length; i++) {
-                    document.getElementById('loadingSub').textContent = `Mencoba Pinterest API ${i + 1}/${cfg.length} (${cfg[i].name})...`;
+                    document.getElementById('loadingSub').textContent = `Mencoba Pinterest API ${i + 1}/${cfg.length}...`;
                     const result = await tryApi(cfg[i], url, parsePinterestResponse);
                     
                     if (result.success) {
@@ -774,10 +712,10 @@
                         return result.data;
                     }
                 }
-                throw new Error('Semua API Pinterest gagal (2 backup)');
+                throw new Error('Semua API Pinterest gagal');
             }
             
-            // Platform lain (Instagram, Facebook, MediaFire)
+            // Platform lain
             const api = cfg.primary;
             document.getElementById('loadingSub').textContent = `Mencoba ${api.name}...`;
             
@@ -800,8 +738,6 @@
                 return;
             }
             
-            debug(`Starting download for ${currentPlatform}: ${url}`);
-            
             lastUrl = url;
             document.getElementById('loadingSection').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
@@ -811,13 +747,11 @@
                 const data = await fetchWithBackup(currentPlatform, url);
                 document.getElementById('loadingSection').classList.add('hidden');
                 
-                debug('Download successful, rendering results');
                 showResults(data);
                 document.getElementById('usedApi').textContent = `Via: ${currentApiUsed}`;
                 showToast('Berhasil!', 'success');
                 
             } catch (err) {
-                debug('Download failed: ' + err.message);
                 console.error('Download error:', err);
                 document.getElementById('loadingSection').classList.add('hidden');
                 document.getElementById('errorSection').classList.remove('hidden');
@@ -827,7 +761,7 @@
         }
 
         // ============================================
-        // RENDER FUNCTIONS
+        // RENDER FUNCTIONS - WITH FIXED DOWNLOAD BUTTONS
         // ============================================
         
         function showResults(data) {
@@ -836,7 +770,6 @@
             div.classList.remove('hidden');
             
             const renderers = {
-                // TIKTOK - ORIGINAL
                 tiktok: () => `
                     <div class="result-card bg-white rounded-xl p-4 shadow">
                         <div class="flex flex-col sm:flex-row gap-4">
@@ -851,24 +784,19 @@
                             <div class="sm:w-2/3 space-y-3">
                                 <h4 class="font-bold text-gray-800 text-sm">${data.title || 'TikTok Video'}</h4>
                                 <p class="text-xs text-gray-500">${data.author || '@user'}</p>
-                                <div class="flex gap-2">
-                                    <span class="bg-gradient-to-r from-green-400 to-green-600 text-white px-2 py-1 rounded-full text-xs">HD</span>
-                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">No WM</span>
-                                </div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <a href="${data.videoUrl}" target="_blank" rel="noopener noreferrer" class="download-btn text-white py-2 rounded-lg text-center text-sm font-semibold block">
+                                    <button onclick="forceDownload('${data.videoUrl}', 'video.mp4')" class="download-btn text-white py-2 rounded-lg text-center text-sm font-semibold">
                                         <i class="fas fa-video mr-1"></i>Video
-                                    </a>
+                                    </button>
                                     ${data.audioUrl ? `
-                                    <a href="${data.audioUrl}" target="_blank" rel="noopener noreferrer" class="bg-gray-100 text-gray-700 py-2 rounded-lg text-center text-sm font-semibold hover:bg-gray-200 block">
+                                    <button onclick="forceDownload('${data.audioUrl}', 'audio.mp3')" class="bg-gray-100 text-gray-700 py-2 rounded-lg text-center text-sm font-semibold hover:bg-gray-200">
                                         <i class="fas fa-music mr-1"></i>Audio
-                                    </a>` : ''}
+                                    </button>` : ''}
                                 </div>
                             </div>
                         </div>
                     </div>`,
                 
-                // YOUTUBE - ORIGINAL
                 youtube: () => `
                     <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-red-600">
                         <div class="flex gap-4">
@@ -881,31 +809,29 @@
                             <div class="flex-1 min-w-0">
                                 <h4 class="font-bold text-gray-800 text-sm line-clamp-2 mb-2">${data.title || 'YouTube Video'}</h4>
                                 <span class="${data.format === 'mp3' ? 'bg-gradient-to-r from-orange-400 to-yellow-400' : 'bg-gradient-to-r from-green-400 to-emerald-500'} text-white px-2 py-1 rounded-full text-xs">${data.quality || 'HD'}</span>
-                                <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="mt-2 block w-full download-btn text-white py-2 rounded-lg text-center text-sm font-semibold">
+                                <button onclick="forceDownload('${data.downloadUrl}', 'download.${data.format}')" class="mt-2 block w-full download-btn text-white py-2 rounded-lg text-center text-sm font-semibold">
                                     <i class="fas fa-download mr-1"></i>Unduh ${data.format?.toUpperCase() || 'VIDEO'}
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>`,
                 
-                // INSTAGRAM - ORIGINAL
                 instagram: () => data.items && data.items.length > 0 ? `
                     <div class="result-card bg-white rounded-xl p-4 shadow">
                         <h4 class="font-bold text-gray-800 mb-3 text-sm">${data.items.length} Media Ditemukan</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
                             ${data.items.map((item, i) => `
-                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group block">
+                                <button onclick="forceDownload('${item.url}', 'media${i+1}.${item.type === 'video' ? 'mp4' : 'jpg'}')" class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group block text-left">
                                     ${item.type === 'video' ? '<div class="absolute inset-0 flex items-center justify-center z-10"><i class="fas fa-play-circle text-white text-2xl drop-shadow-lg"></i></div>' : ''}
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
                                         <i class="fas fa-download text-white"></i>
                                     </div>
                                     <div class="absolute top-1 right-1 bg-black text-white text-xs px-1 rounded z-20">${i + 1}</div>
-                                </a>
+                                </button>
                             `).join('')}
                         </div>
                     </div>` : '<div class="text-red-500 text-center py-4">Tidak ada media ditemukan</div>',
                 
-                // FACEBOOK - ORIGINAL
                 facebook: () => data.formats && data.formats.length > 0 ? `
                     <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-blue-600">
                         <h4 class="font-bold text-gray-800 text-sm mb-3 line-clamp-2">${data.title || 'Facebook Video'}</h4>
@@ -915,15 +841,14 @@
                         </div>` : ''}
                         <div class="grid grid-cols-2 gap-2">
                             ${data.formats.map(f => `
-                                <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="bg-blue-50 border-2 border-blue-200 hover:border-blue-400 rounded-lg p-3 text-center transition block">
+                                <button onclick="forceDownload('${f.url}', 'facebook_${f.quality}.mp4')" class="bg-blue-50 border-2 border-blue-200 hover:border-blue-400 rounded-lg p-3 text-center transition block">
                                     <div class="font-bold text-blue-700 text-lg">${f.quality}</div>
-                                    <div class="text-xs text-blue-500">Kualitas ${f.quality}</div>
-                                </a>
+                                    <div class="text-xs text-blue-500">Download ${f.quality}</div>
+                                </button>
                             `).join('')}
                         </div>
                     </div>` : '<div class="text-red-500 text-center py-4">Format tidak ditemukan</div>',
                 
-                // MEDIAFIRE - ORIGINAL
                 mediafire: () => data.downloadUrl ? `
                     <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-blue-500">
                         <div class="flex items-center gap-3 mb-3">
@@ -935,12 +860,11 @@
                                 <p class="text-xs text-gray-500">${data.size}</p>
                             </div>
                         </div>
-                        <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="block w-full download-btn text-white py-3 rounded-lg text-center font-semibold">
+                        <button onclick="forceDownload('${data.downloadUrl}', '${data.filename}')" class="block w-full download-btn text-white py-3 rounded-lg text-center font-semibold">
                             <i class="fas fa-cloud-download-alt mr-2"></i>Download File
-                        </a>
+                        </button>
                     </div>` : '<div class="text-red-500 text-center py-4">Link download tidak ditemukan</div>',
                 
-                // SPOTIFY - FIXED
                 spotify: () => data.downloadUrl ? `
                     <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-green-500">
                         <div class="flex gap-4 items-center">
@@ -953,14 +877,13 @@
                             <div class="flex-1 min-w-0">
                                 <h4 class="font-bold text-gray-800 text-sm truncate">${data.title || 'Unknown Track'}</h4>
                                 <p class="text-xs text-gray-500 truncate mb-2">${data.artist || 'Unknown Artist'}</p>
-                                <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center download-btn text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                <button onclick="forceDownload('${data.downloadUrl}', '${(data.title || 'track').replace(/[^a-z0-9]/gi, '_')}.mp3')" class="inline-flex items-center download-btn text-white px-4 py-2 rounded-full text-sm font-semibold">
                                     <i class="fas fa-download mr-2"></i>Unduh MP3
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>` : '<div class="text-red-500 text-center py-4">Link download tidak ditemukan</div>',
                 
-                // PINTEREST - FIXED
                 pinterest: () => data.downloadUrl ? `
                     <div class="result-card bg-white rounded-xl p-4 shadow border-l-4 border-red-700">
                         <div class="flex flex-col sm:flex-row gap-4">
@@ -974,9 +897,9 @@
                             </div>
                             <div class="sm:w-1/2 space-y-4">
                                 <h4 class="font-bold text-gray-800 text-sm line-clamp-3">${data.title || 'Pinterest Image'}</h4>
-                                <a href="${data.downloadUrl}" target="_blank" rel="noopener noreferrer" class="block w-full download-btn text-white py-3 rounded-lg text-center font-semibold">
+                                <button onclick="forceDownload('${data.downloadUrl}', 'pinterest_image.jpg')" class="block w-full download-btn text-white py-3 rounded-lg text-center font-semibold">
                                     <i class="fas fa-download mr-2"></i>Download Image
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>` : '<div class="text-red-500 text-center py-4">Gambar tidak ditemukan</div>'
@@ -984,6 +907,78 @@
             
             content.innerHTML = (renderers[currentPlatform] || (() => '<div class="text-red-500 text-center py-4">Platform tidak didukung</div>'))();
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ============================================
+        // FORCE DOWNLOAD FUNCTION - FIX UNTUK DOWNLOAD LANGSUNG
+        // ============================================
+        
+        async function forceDownload(url, filename) {
+            if (!url) {
+                showToast('URL download tidak valid', 'error');
+                return;
+            }
+            
+            showToast('Memulai download...', 'success');
+            
+            try {
+                // Coba fetch dengan CORS proxy jika diperlukan
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                
+                // Fetch file sebagai blob
+                const response = await fetch(url, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': '*/*'
+                    }
+                });
+                
+                clearTimeout(timeout);
+                
+                if (!response.ok) {
+                    // Jika fetch gagal (CORS), coba buka di tab baru dengan download attribute
+                    throw new Error('Fetch failed, trying alternative method');
+                }
+                
+                // Convert ke blob dan download
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                window.URL.revokeObjectURL(blobUrl);
+                showToast('Download dimulai!', 'success');
+                
+            } catch (err) {
+                console.error('Force download error:', err);
+                
+                // Fallback: buka link di tab baru dengan parameter download
+                // atau gunakan iframe untuk trigger download
+                try {
+                    // Method 1: Buat link dengan download attribute
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    showToast('Mencoba download...', 'info');
+                } catch (fallbackErr) {
+                    // Method 2: Buka di tab baru saja
+                    window.open(url, '_blank');
+                    showToast('File dibuka di tab baru', 'info');
+                }
+            }
         }
 
         function clearResults() {
